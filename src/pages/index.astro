@@ -1,11 +1,509 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
-
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+// 匯入 Layout
+import BaseLayout from '../layouts/BaseLayout.astro';
 ---
+<BaseLayout>
+<title>空間客舍 Slow Pace Studio</title>
+<Fragment slot="head">
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>空間客舍 Slow Pace Studio</title>
+        <meta name="description" content="空間客舍 SLOW PACE STUDIO 是一個在二零二四年開業的藝文空間，以創作者為中心，坐落在長沙灣一所褪去舊日鉛華的商場裏，做著交流、分享、思考、創作……等事情。">
+        
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
 
-<Layout>
-	<Welcome />
-</Layout>
+        <meta name="google-site-verification" content="EH9jBqiuCw-Hotk3g1MO9O579-Wcz_Jlv6v0Up6liJg" />
+
+        <script type="application/ld+json">
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "空間客舍 Slow Pace Studio",
+          "url": "https://studioslowpace.github.io/"
+        }
+        </script>
+
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZBQ95KH0ET"></script>
+        <script is:inline>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-ZBQ95KH0ET');
+        </script>
+    </Fragment>
+
+
+    <style>
+        /* --- 全網頁基礎防懸空與穩定排版 --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        html, body {
+            height: 100%;
+        }
+        body {
+            background-color: #FAFAF7; 
+            font-family: "Noto Sans TC", sans-serif;
+            color: #4A4A4A;
+            -webkit-font-smoothing: antialiased;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+
+/* 定義 CSS 變數以進行統一管理與優化 */
+:root {
+    /* 顏色 */
+    --primary-blue: #1465A3;   /* 空間客舍深藍色 */
+    --banner-bg: #A9D0D6;     /* 淺藍綠背景 */
+    --white: #ffffff;
+    
+    /* 尺寸與間距 */
+    --banner-height: 340px;
+    --oval-badge-size: 240px;
+    --oval-border-width: 8px;
+    --container-max-width: 1600px;
+}
+
+/* --- Banner 區塊 (BEM: .banner) --- */
+.hero-banner {
+    position: relative;
+    width: 100%;
+    height: var(--banner-height);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    flex-shrink: 0;
+    
+    /* 優化：直接使用重複性漸變背景製作條紋，減少 DOM 節點 */
+    background: 
+        repeating-linear-gradient(
+            to top,
+            var(--banner-bg),
+            var(--banner-bg) 25px,
+            var(--white) 35px,
+            var(--white) 52px  /* 條紋寬度 20px (60-40) */
+        );
+}
+
+/* --- 橢圓形徽章 (BEM: .banner__badge-oval) --- */
+.banner__badge-oval {
+    /* 核心設定：確保所有內容都在橢圓形邊界內裁切 */
+    overflow: hidden;
+
+    /* 之前的橢圓形設定 */
+    border: var(--oval-border-width) solid var(--white);
+width: 100%;               /* 在手機版預設撐滿父容器 */
+    max-width: 600px;          /* 最大只放大到原本的 600px，防止在大螢幕上過大 */
+    aspect-ratio: 600 / 230;   /* ⚡ 核心：鎖定寬高比，寬度縮小時，高度會自動等比例縮小 */
+    border-radius: 90% / 100%;
+}
+
+/* --- 徽章內部圖片 (BEM: .banner__badge-content) --- */
+.banner__badge-content {
+    width: 100%;       /* 填滿父容器寬度 */
+    height: 100%;      /* 填滿父容器高度 */
+    transform: scale(1.1);
+    object-fit: cover; /* 自動裁切並填滿，不會留白 */
+    object-position: center; /* 確保圖案永遠保持在中間 */
+    display: block;
+    object-position: calc(50% - 0px) calc(50% + 20px); /* 向左移動 20px，向上移動 10px */
+}
+
+
+        /* --- 主內容兩欄區外框（穩定版） --- */
+        .main-wrapper {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            flex: 1 0 auto; /* 確保主內容有獨立撐開空間的能力，絕不塌陷 */
+        }
+        .main-container {
+            width: 100%;
+            max-width: 1600px; 
+            margin: 80px 0;
+            padding: 0 50px;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        /* 左欄：內文與標題 */
+        .content-left {
+            flex: 1.6;
+            padding-right: 70px;
+        }
+        .content-left h2 {
+            font-size: 1.8rem;
+            color: #4A4A4A;
+            font-weight: 700;
+            margin-bottom: 45px;
+        }
+        .content-left p {
+            font-size: 0.9rem;
+            line-height: 2.1;
+            color: #4A4A4A;
+            margin-bottom: 35px;
+            text-align: justify;
+            font-weight: 400;
+        }
+        .content-left .intro-p {
+            font-size: 1rem;
+            font-weight: 500;
+            color: #222222;
+        }
+
+        /* 右欄：品牌大圖 */
+        .content-right {
+            flex: 1;
+            border-left: 4px dotted #1465A3; 
+            padding-left: 70px;
+            display: flex;
+            justify-content: center;
+        }
+        .sticky-brand {
+            text-align: center;
+            position: sticky;
+            top: 50px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+        .main-avatar {
+            width: 100%;
+            max-width: 450px;
+        }
+        .main-avatar img {
+            width: 100%;
+            height: auto;
+            object-fit: contain;  
+        }
+
+        /* 區塊整體設定 */
+.neighbour-section {
+  background-color: #929596; /* 採用圖中的灰色背景 */
+  color: #ffffff;
+  padding: 40px 20px;
+  font-family: sans-serif;
+  text-align: center;
+}
+
+/* 標題文字 */
+
+.neighbour-card h2 { 
+    position: absolute;
+      /* 📍 移動左邊文字（標題＋介紹）的位置 */
+  top: 00px;         /* 距離頂部 180px，剛好疊在相片下半部 */
+  left: 180px;         /* 距離左邊 20px */
+  line-height: 1.5; /* 代表行距是字體大小的 1.5 倍（大約 33px） */
+  letter-spacing: 3px; /* 每個字之間多空出 2px 的距離 */
+  max-width: 500px;
+  text-align: left;
+    font-size: 28px; margin-top: 0; font-weight: normal; opacity: 0.9; }
+
+
+.neighbour-card h3 { 
+    position: absolute;
+      /* 📍 移動左邊文字（標題＋介紹）的位置 */
+  top: 45px;         /* 距離頂部 180px，剛好疊在相片下半部 */
+  left: 180px;         /* 距離左邊 20px */
+  line-height: 1.5; /* 代表行距是字體大小的 1.5 倍（大約 33px） */
+  letter-spacing: 1px; /* 每個字之間多空出 2px 的距離 */
+  max-width: 500px;
+  text-align: left;
+    font-size: 28px; margin-top: 0; font-weight: normal; opacity: 0.9; }
+
+
+
+/* ===================================================
+   容器基礎設定：確保卡片是獨立的定位地基
+   =================================================== */
+.neighbour-card {
+  display: flex;
+  align-items: flex-start;
+  position: relative; /* 關鍵：當作內部相片與文字的定位基準 */
+  display: block;     /* 或是 flex，確保撐開空間 */
+  max-width: 1000px;
+  height: 600px;      /* 給予固定高度，防止內部絕對定位後空間坍塌 */
+  overflow: visible;  /* 允許微調時稍微局部溢出，比較生動 */
+  margin: 40px auto;
+  gap: 30px;
+}
+
+
+.neighbour-img {
+  position: absolute;
+  height: 550px;      /* 調整相片大小 */
+  width: auto;
+  
+  /* 📍 移動左邊相片：調整這兩個數值 */
+  top: 100px;          /* 距離卡片頂部 10px (加大往下移，減小或負值往上移) */
+  left: 0px;         /* 距離卡片左邊 30px (加大往右移，減小往左移) */
+  
+  z-index: 1;         /* 在最底層 */
+}
+
+.neighbour-img2 {
+  position: absolute;
+  height: 500px;      /* 調整相片大小 */
+  width: auto;
+  
+  /* 📍 移動左邊相片：調整這兩個數值 */
+  top: 0px;          /* 距離卡片頂部 10px (加大往下移，減小或負值往上移) */
+  left: 450px;         /* 距離卡片左邊 30px (加大往右移，減小往左移) */
+  
+  z-index: 1;         /* 在最底層 */
+}
+
+.neighbour-info {
+  position: absolute;
+  z-index: 2;         /* 關鍵：數字大於相片，確保圖層在相片之上 */
+  
+  /* 📍 移動左邊文字（標題＋介紹）的位置 */
+  top: 500px;         /* 距離頂部 180px，剛好疊在相片下半部 */
+  left: 400px;         /* 距離左邊 20px */
+  
+  max-width: 500px;
+  text-align: left;
+}
+
+.neighbour-info2 {
+  position: absolute;
+  z-index: 2;         /* 關鍵：確保圖層在相片之上 */
+  
+  /* 📍 移動右邊文字（標題＋介紹）的位置 */
+  top: 180px;         /* 距離頂部 180px */
+  right: 300px;        /* 💡 改用 right，讓文字靠右邊對齊 */
+  
+  max-width: 280px;
+  text-align: right;  /* 右邊的文字可以設定靠右對齊，視覺更對稱 */
+}
+
+
+/* ===================================================
+   ✍️ 文字通用美化（H4 標題與 P 內文）
+   =================================================== */
+.neighbour-info h4, .neighbour-info2 h4 {
+  font-size: 22px;
+  font-weight: bold;
+  color: #ffffff;
+  margin: 0 0 8px 0;
+  letter-spacing: 1.5px; /* 每個字之間多空出 2px 的距離 */
+  
+  /* 💡 如果相片底色太淺字看不清，可以取消下面這行的註解加陰影 */
+  /* text-shadow: 1px 1px 5px rgba(0,0,0,0.8); */
+}
+
+.neighbour-info p, .neighbour-info2 p {
+  font-size: 13px;
+  line-height: 1.6;
+  color: #ffffff;
+  margin: 0;
+  opacity: 0.95;
+  letter-spacing: 1.2px; /* 每個字之間多空出 2px 的距離 */
+}
+
+.neighbour-card:hover {
+  transform: translateY(-5px); /* 滑鼠滑過時有些微浮起效果 */
+}
+
+/* 底部備註 */
+.neighbour-footer {
+  max-width: 800px;
+  margin: 30px auto 0 auto;
+  font-size: 13px;
+  opacity: 0.8;
+  line-height: 1.6;
+}
+
+.neighbour-section a {
+  text-decoration: none !important; /* 移除底線 */
+  color: inherit !important;        /* 💡 關鍵：繼承父層文字顏色，文字寫什麼顏色它就是什麼顏色 */
+}
+
+        /* 首頁專屬 RWD 手機優化 */
+
+        @media (max-width: 768px) {
+            .navbar-wrapper { min-height: 180px; }
+            .hero-banner { height: 180px; background: 
+        repeating-linear-gradient(
+            to top,
+            var(--banner-bg),
+            var(--banner-bg) 15px,
+            var(--white) 20px,
+            var(--white) 32px  /* 條紋寬度 20px (60-40) */
+        );}
+        .banner__badge-content {
+    object-position: calc(50% - 0px) calc(50% + 15px); /* 向左移動 20px，向上移動 10px */
+}
+            .stripe-bg { height: 100px; border-top: 12px solid #ffffff; border-bottom: 12px solid #ffffff; }
+            .badge-circle { width: 140px; height: 140px; border: 5px solid #ffffff; padding: 10px; }
+            .main-container { flex-direction: column; padding: 0 25px; margin: 40px auto; display: flex !important; }
+            .content-left { padding-right: 0; }
+
+            .content-left h2 {font-size: 1.6rem; }
+            .content-left p {font-size: 0.8rem; }
+            .intro-p {font-size: 0.9rem; }
+            .content-right { border-left: none; border-top: 4px dotted #1465A3; padding-left: 0; padding-top: 40px; margin-top: 40px; width: 100%; }
+            .main-avatar { max-width: 260px; }
+
+/* 1. 讓最外層的 section 寬度自適應，並加上內縮，字才不會貼到螢幕邊緣 */
+  .neighbour-section {
+    padding: 10px 15px !important;
+    
+  }
+
+  /* 2. 核心修正：大盒子解除 600px 限制，改成由內容自動撐開高度 */
+  .neighbour-card {
+    height: auto !important; 
+    max-width: 100% !important;
+    margin: 20px auto !important;
+    overflow: visible !important;
+    
+    /* 💡 改為彈性盒子的上下單欄排列 */
+    display: flex !important;
+    flex-direction: column !important; 
+    align-items: center !important;
+  }
+
+  .neighbour-card h2 {
+    position: relative !important;
+   top: auto !important;
+    left: auto !important;
+    font-size: 24px !important; /* 手機版標題字體稍微縮小 */
+    margin: 0px -220px -20px 0px !important;
+    text-align: left; 
+  }
+  
+  .neighbour-card h3 {
+    position: relative !important;
+       top: auto !important;
+    left: auto !important;
+    font-size: 20px !important;
+    margin: -10px -250px -220px 0px !important;
+    text-align: right; 
+  }
+
+  /* 4. 左邊【紅色鄰里人】相片：解除定位，縮小尺寸，置中 */
+  .neighbour-img {
+    position: relative !important;
+    top: 30;
+    left: auto !important;
+    height: 320px !important; /* 💡 手機版照片高度縮小到 320px，寬度會自動等比例縮小 */
+    width: auto !important;
+    margin: -30px auto 0px -30px !important;
+    display: block !important;
+  }
+
+  /* 5. 右邊【藍色客舍人】相片：同樣解除定位，縮小尺寸，置中 */
+  .neighbour-img2 {
+    position: relative !important;
+    top: 0 !important;
+    left: auto !important;
+    height: 320px !important; /* 💡 手機版照片高度 */
+    width: auto !important;
+    margin: -60px auto 0px auto !important; /* 上方加 40px，跟左邊的介紹文字拉開距離 */
+    display: block !important;
+  }
+
+  /* 6. 左邊介紹文字：解除定位，放回相片正下方 */
+  .neighbour-info {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    max-width: 100% !important;
+    width: 90% !important;
+    text-align: right; /* 手機版內文置中更好閱讀 */
+    margin: 0 auto 20px 3px !important;
+  }
+
+  /* 7. 右邊介紹文字：解除定位，文字從靠右改成置中 */
+  .neighbour-info2 {
+    position: relative !important;
+    top: 0 !important;
+    right: auto !important;
+    max-width: 100% !important;
+    width: 90% !important;
+    text-align: left; /* 💡 右邊文字在手機版也改成置中，才不會歪一邊 */
+    margin: -70px 3px 20px auto !important;
+  }
+ 
+  .neighbour-footer {
+  font-size: 10px;
+  text-align: left;
+}
+}
+    </style>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-ZBQ95KH0ET"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-ZBQ95KH0ET');
+</script>
+
+
+
+
+    <section class="hero-banner">
+        <div class="banner__badge-oval">
+            <img src="/images/header_r1.png" class="banner__badge-content" alt="眼鏡插畫徽章" oncontextmenu="return false;" ondragstart="return false;">
+        </div>
+    </section>
+
+    <div class="main-wrapper">
+        <main class="main-container">
+            <article class="content-left">
+                <h2>關於空間客舍</h2>
+                <p class="intro-p">一個在二零二四年開業的藝文空間，以創作者為中心，坐落在長沙灣一所褪去舊日鉛華的商場裏，做著交流、分享、思考、創作……等事情。</p>
+                <p>“Every community deserves a third place.” 早在1989年，美國社會學家Ray Oldenburg便提出「第三空間」的概念，家為第一空間，工作、學習的地方為第二空間，而餐廳、公園、廣場皆為第三空間。作為充滿隨機性、容許人們聚集與遇見的第三空間，大部分地方在規劃時已經訂立明確清晰的用途，詳細列明不可以進行的活動...</p>
+                <p>城市空間的使用似乎不能脫離資本主義或權力架構下談論，而在「可為」和「不可為」中，當中涉及不同權力的對話。我們在這個空間裏，提供多一種金錢以外的交易方式，以「技能交換」作為換取空間的使用，人們可以因應興趣在這邊舉辦活動...</p>
+            </article>
+
+            <aside class="content-right">
+                <div class="sticky-brand">
+                    <div class="main-avatar">
+                        <img src="/images/logo-square.png" alt="空間客舍 品牌大圖" oncontextmenu="return false;" ondragstart="return false;">
+                    </div>
+                </div>
+            </aside>
+        </main>
+    </div>
+
+    <section class="neighbour-section">
+      <a href="https://docs.google.com/forms/d/e/1FAIpQLSf3ViVbwi-QYfr-RiRwNOilQYFMo2hHQPn0SkgicE7Ifk5twQ/viewform" target="_blank" rel="noopener noreferrer" class="neighbour-link" aria-label="客舍鄰里人計劃">
+      <div class="neighbour-card">
+        <h2>成為鄰里人</h2>
+    <h3>Becoming<br>our<br>neighbour</h3>
+      <img src="/images/neighbour1.PNG" alt="鄰里人" class="neighbour-img" oncontextmenu="return false;" ondragstart="return false;">
+      <div class="neighbour-info">
+        <h4>鄰里人</h4>
+        <p>參加活動，即可獲得資格<br>福利：一個月Pass，其後每個活動可獲-$20之優惠</p>
+      </div>
+      
+
+      <img src="/images/neighbour2.PNG" alt="客舍人" class="neighbour-img2" oncontextmenu="return false;" ondragstart="return false;">
+      <div class="neighbour-info2">
+        <h4>客舍人</h4>
+        <p>贊助客舍$300，即可獲得資格<br>福利：三個月Pass，所有讀書會、電影放映、音樂會、傾計會為免費</p>
+      </div>
+      </div>
+     </a>
+
+
+  <div class="neighbour-footer">
+    <p>以上資格，亦可以用技能換取，貢獻一次技能，可換取一個月的鄰里人資格，而客舍人的資格則需要累積三次的技能貢獻才可獲得。</p>
+  </div>
+</section>
+
+
+    
+</BaseLayout>

@@ -1,0 +1,1702 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>客舍電子報管理系統</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+
+        *, *::before, *::after {
+    box-sizing: border-box !important;
+}
+        /* --- 全局變數與基礎設定 --- */
+        :root {
+            --bg-main: #f9fafb;
+            --bg-card: #ffffff;
+            --bg-nav: rgba(255, 255, 255, 0.9);
+            --border-color: #e5e7eb;
+            --text-main: #111827;
+            --text-muted: #6b7280;
+            --text-light: #9ca3af;
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --primary-light: #e0e7ff;
+            --primary-text: #3730a3;
+            --amber: #d97706;
+            --amber-hover: #b45309;
+            --amber-light: #fef3c7;
+            --amber-text: #92400e;
+            --rose: #e11d48;
+            --rose-hover: #be123c;
+            --rose-light: #ffe4e6;
+            --emerald: #059669;
+            --sky: #0284c7;
+        }
+
+        html.dark {
+            --bg-main: #111827;
+            --bg-card: #1f2937;
+            --bg-nav: rgba(31, 41, 55, 0.9);
+            --border-color: #374151;
+            --text-main: #f9fafb;
+            --text-muted: #9ca3af;
+            --text-light: #6b7280;
+            --primary: #818cf8;
+            --primary-hover: #6366f1;
+            --primary-light: #1e1b4b;
+            --primary-text: #c7d2fe;
+            --amber: #fbbf24;
+            --amber-hover: #f59e0b;
+            --amber-light: #78350f;
+            --amber-text: #fde68a;
+            --rose: #fb7185;
+            --rose-hover: #f43f5e;
+            --rose-light: #4c0519;
+            --emerald: #34d399;
+            --sky: #38bdf8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Noto Sans TC", sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: background-color 0.3s, color 0.3s;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* --- 實用通用類別 --- */
+        .container {
+            width: 100%;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 16px;
+            /* 關鍵：讓 padding 內縮，不撐開寬度 */
+    box-sizing: border-box;
+        }
+        .hidden { display: none !important; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .flex-row-end { display: flex; justify-content: flex-end; gap: 8px; }
+
+        /* --- 導覽列與全新動態搜尋欄 --- */
+        .navbar {
+            border-bottom: 1px solid var(--border-color);
+            background-color: var(--bg-nav);
+            backdrop-filter: blur(8px);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+        .nav-container {
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            
+        }
+        
+        /* 導覽列靠右的 Logo 與名稱 */
+.nav-right-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: bold;
+    font-size: 20px;
+    color:#2b579a;
+    text-align: center;
+    
+    /* 核心修改：利用絕對定位實現水平完美居中 */
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+        .logo-btn {
+            height: 38px;
+            width: auto;
+            object-fit: contain;
+            vertical-align: middle;
+        }
+
+        /* 左側動態展開搜尋區塊 */
+        .nav-left-search {
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+        .search-trigger-btn {
+            padding: 10px;
+            border-radius: 50%;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 18px;
+            z-index: 10;
+            transition: background-color 0.2s;
+        }
+        .search-trigger-btn:hover { background-color: var(--border-color); }
+        
+        /* 搜尋展開組件基礎設定 (向左展開) */
+.expandable-search-wrapper {
+    display: flex;
+    align-items: center;
+    width: 0px;
+    opacity: 0;
+    overflow: hidden;
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s;
+    position: absolute;
+    right: 44px; /* 定位在搜尋圖示的左側 */
+    white-space: nowrap;
+    z-index: 1;
+}
+
+/* 點擊觸發後的展開狀態 */
+.expandable-search-wrapper.open {
+    width: 400px; /* 電腦端展開輸入框寬度 */
+    opacity: 1;
+}
+
+.search-input-field {
+    width: 100%;
+    padding: 8px 32px 8px 12px;
+    border-radius: 20px;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-card);
+    color: var(--text-main);
+    font-size: 14px;
+    outline: none;
+}
+
+.inline-clear-btn {
+    position: absolute;
+    right: 10px;
+    background: none;
+    border: none;
+    color: var(--text-light);
+    cursor: pointer;
+    font-size: 12px;
+}
+
+        /* --- 按鈕樣式 --- */
+        .btn-icon {
+            padding: 10px;
+            border-radius: 50%;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+        .btn-icon:hover { background-color: var(--border-color); }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        .btn-primary { background-color: var(--primary); color: white; }
+        .btn-primary:hover { background-color: var(--primary-hover); }
+        .btn-amber { background-color: var(--amber); color: white; }
+        .btn-amber:hover { background-color: var(--amber-hover); }
+        .btn-rose { background-color: var(--rose); color: white; }
+        .btn-rose:hover { background-color: var(--rose-hover); }
+        .btn-emerald { background-color: var(--emerald); color: white; }
+        .btn-sky { background-color: var(--sky); color: white; }
+        .btn-text { background: transparent; color: var(--text-muted); box-shadow: none; }
+        .btn-text:hover { color: var(--text-main); }
+
+        /* --- 主頁面與面板 --- */
+        .main-content {
+            padding: 24px 0;
+            flex-grow: 1;
+        }
+        .panel {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        .panel-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--primary);
+            padding-bottom: 16px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .form-group label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+        .form-control {
+            padding: 10px 14px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            background: transparent;
+            color: var(--text-main);
+            font-size: 15px;
+            outline: none;
+        }
+        .form-control:focus { border-color: var(--primary); }
+        
+        /* 圖片預覽區 */
+        .img-preview-container {
+            margin-top: 12px;
+            padding: 12px;
+            background-color: var(--bg-main);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+        }
+        .img-preview-grid { display: flex; flex-wrap: wrap; gap: 10px; }
+        .preview-item {
+            position: relative;
+            width: 70px;
+            height: 70px;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .preview-item img { width: 100%; height: 100%; object-fit: cover; }
+        .preview-delete {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 10px;
+            cursor: pointer;
+        }
+
+        /* --- 備份與後台選單面板 --- */
+        .backup-panel {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .backup-title { display: flex; align-items: center; gap: 8px; font-weight: bold; font-size: 14px; }
+        .backup-title i { color: var(--primary); }
+
+        /* --- 文章列表標頭與黑暗模式按鈕整合 --- */
+        .list-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .list-header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .list-header-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .post-count {
+            font-size: 13px;
+            color: var(--text-muted);
+            background-color: var(--border-color);
+            padding: 4px 10px;
+            border-radius: 999px;
+        }
+        .posts-container { display: flex; flex-direction: column; gap: 20px; }
+        
+        .post-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 20px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .post-card:hover { transform: translateY(-2px); }
+        .card-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; align-items: center; }
+        
+        /* 標籤元件 */
+        .tag {
+            font-size: 11px;
+            font-weight: bold;
+            padding: 2px 10px;
+            border-radius: 6px;
+            border: 1px solid transparent;
+        }
+        .tag-issue { background-color: var(--primary-light); color: var(--primary-text); border-color: var(--primary-color); }
+        .tag-category { background-color: var(--amber-light); color: var(--amber-text); border-color: var(--amber-color); }
+        .tag-author { background-color: var(--border-color); color: var(--text-muted); font-weight: 500; }
+        .tag-info { background-color: var(--bg-main); color: var(--text-light); font-weight: 500; display: inline-flex; align-items: center; gap: 4px;}
+
+        .card-title { font-size: 18px; font-weight: bold; margin-bottom: 8px; }
+        .card-body { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 14px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-color);
+            font-size: 11px;
+            color: var(--text-light);
+        }
+
+        /* 空狀態 */
+        .empty-state {
+            text-align: center;
+            padding: 64px 0;
+            border: 2px dashed var(--border-color);
+            border-radius: 16px;
+            color: var(--text-light);
+        }
+        .empty-state i { font-size: 40px; margin-bottom: 12px; display: block; }
+
+        /* --- 文章詳細頁面 --- */
+        .article-view { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 24px; padding: 40px; }
+        .article-title { font-size: 28px; font-weight: 900; margin: 16px 0; }
+        .article-meta { display: flex; gap: 16px; font-size: 12px; color: var(--text-light); padding-bottom: 16px; border-bottom: 1px solid var(--border-color); margin-bottom: 24px; }
+        .article-body { font-size: 17px; color: var(--text-main); line-height: 1.8; white-space: pre-line; word-break: break-all; }
+        
+        /* 圖片輪播 */
+        .carousel-desktop {
+            display: flex; position: relative; width: 100%; max-height: 500px; align-items: center; justify-content: center; 
+            background-color: var(--bg-main); border-radius: 12px; padding: 8px; border: 1px solid var(--border-color);
+        }
+        .carousel-desktop img { max-width: 100%; max-height: 460px; object-fit: contain; border-radius: 8px; }
+        .carousel-btn { position: absolute; background: rgba(0,0,0,0.4); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .carousel-btn:hover { background: rgba(0,0,0,0.7); }
+        .carousel-btn.prev { left: 12px; }
+        .carousel-btn.next { right: 12px; }
+        .carousel-indicator { position: absolute; bottom: 16px; background: rgba(0,0,0,0.6); color: white; padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+        
+        .carousel-mobile { display: none; overflow-x: auto; scroll-snap-type: x mandatory; gap: 16px; width: 100%; padding: 4px 0; }
+        .carousel-mobile-item { width: 100%; flex-shrink: 0; scroll-snap-align: center; display: flex; justify-content: center; background-color: var(--bg-main); border-radius: 12px; border: 1px solid var(--border-color); padding: 4px; }
+        .carousel-mobile-item img { max-width: 100%; max-height: 400px; object-fit: contain; border-radius: 8px; }
+
+        /* --- 驗證彈窗 --- */
+        .modal-mask { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 50; display: flex; align-items: center; justify-content: center; padding: 16px; }
+        .modal-card { background-color: var(--bg-card); border-radius: 16px; width: 100%; max-width: 400px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); border: 1px solid var(--border-color); transform: scale(0.95); opacity: 0; transition: all 0.3s; }
+        .modal-card.active { transform: scale(1); opacity: 1; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .modal-error { color: var(--rose); font-size: 12px; margin-top: 8px; display: flex; align-items: center; gap: 4px; }
+
+        /* --- 響應式微調 --- */
+        @media (max-width: 768px) {
+
+            .carousel-desktop { display: none; }
+            .carousel-mobile { display: flex; }
+            .article-view { padding: 20px; }
+            .form-grid { grid-template-columns: 1fr; }
+            .hidden-mobile { display: none !important; }
+            .expandable-search-wrapper.open { width: 160px; } /* 手機端展開窄一點避免擠壓 */
+        }
+    </style>
+</head>
+<body>
+
+<div id="header-container"></div>
+
+    <nav class="navbar">
+        <div class="nav-container container">
+            <div class="nav-right-logo" style="margin-left: auto; display: flex; align-items: center; gap: 10px; font-weight: bold; font-size: 20px;">
+                <img class="logo-btn" id="logoAdminBtn" onclick="handleAdminClick()" style="cursor: pointer; height: 32px; width: auto; object-fit: contain;" title="管理員模式切換" src="images/logo-small2.png" alt="客舍Logo" oncontextmenu="return false;" ondragstart="return false;">
+                <span onclick="backToHome()" style="cursor: pointer; line-height: 1.2;" title="返回電子報首頁">空間客寫<br><span style="font-size: 12px; font-weight: normal; opacity: 0.8;">Slow Pace Newsletter</span></span>
+            </div>
+        </div>
+    </nav>
+
+    <main id="homePage" class="main-content container">
+
+        <section id="adminPanel" class="panel hidden">
+            <div id="panelTitle" class="panel-title">
+                <i class="fa-solid fa-pen-to-square"></i>
+                <span>發布新電子報文章</span>
+            </div>
+            
+            <div style="display:flex; flex-direction:column; gap:16px;">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>文章標題</label>
+                        <input type="text" id="postTitle" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>文章作者</label>
+                        <input type="text" id="postAuthor" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>文章期數</label>
+                        <input type="text" id="postIssue" class="form-control" placeholder="例如：第 003 期">
+                    </div>
+                    <div class="form-group">
+                        <label>文章分類</label>
+                        <input type="text" id="postCategory" class="form-control" placeholder="例如：生活隨筆">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>文章內文</label>
+                    <textarea id="postContent" rows="6" class="form-control" style="resize:vertical; line-height:1.6;"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <label>附加相片 (支援多選)</label>
+                        <button id="clearImgBtn" onclick="clearImageInput()" class="btn-text" style="color:var(--rose); font-weight:bold; font-size:12px;"><i class="fa-solid fa-circle-xmark"></i> 清空已選</button>
+                    </div>
+                    <input type="file" id="postImage" accept="image/*" multiple class="form-control" style="cursor:pointer;">
+                    
+                    <div id="imgPreviewContainer" class="img-preview-container hidden">
+                        <div id="imgPreviewGrid" class="img-preview-grid"></div>
+                    </div>
+                </div>
+                
+                <div class="flex-row-end" style="margin-top:8px;">
+                    <button id="cancelEditBtn" onclick="resetForm()" class="btn btn-text hidden">取消修改</button>
+                    <button id="submitPostBtn" onclick="submitArticleForm()" class="btn btn-primary">
+                        <i class="fa-solid fa-paper-plane"></i>
+                        <span id="submitBtnText">立即發布文章</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section id="backupPanel" class="panel hidden">
+            <div class="backup-panel" style="margin-bottom: 16px; padding-bottom: 14px; border-bottom: 1px solid var(--border-color);">
+                <div class="backup-title">
+                    <i class="fa-solid fa-user-gear"></i>
+                    <span>管理員後台權限設定</span>
+                </div>
+                <div class="flex-row-end">
+                    <button id="changePwdBtn" class="btn btn-amber" title="修改管理密碼" onclick="openModal('changePwd')">
+                        <i class="fa-solid fa-key"></i> <span>修改密碼</span>
+                    </button>
+                    <button class="btn btn-rose" onclick="handleAdminClick()">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i> <span>安全退出後台</span>
+                    </button>
+                </div>
+            </div>
+            <div class="backup-panel">
+                <div class="backup-title">
+                    <i class="fa-solid fa-database"></i>
+                    <span>系統數據本地備份與還原</span>
+                </div>
+                <div class="flex-row-end">
+                    <button onclick="exportToExcel()" class="btn btn-emerald">
+                    <i class="fa-solid fa-download"></i> 匯出 Excel 報表
+                    </button>
+                    <input type="file" id="excelImportInput" accept=".xlsx, .xls" style="display: none;" onchange="handleExcelImport(event)">
+                    <button onclick="document.getElementById('excelImportInput').click()" class="btn btn-sky">
+                       <i class="fa-solid fa-upload"></i> 匯入 Excel 建立文章
+                    </button>
+                    <button onclick="exportBackupJSON()" class="btn btn-emerald">
+                        <i class="fa-solid fa-download"></i> <span>匯出資料備份</span>
+                    </button>
+                    <label class="btn btn-sky" style="cursor:pointer;">
+                        <i class="fa-solid fa-upload"></i> <span>匯入還原資料</span>
+                        <input type="file" id="importFile" accept=".json" class="hidden" onchange="importBackupJSON(this)">
+                    </label>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <div class="list-header" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+                <div class="list-header-left" style="display: flex; align-items: center; gap: 12px;">
+                    <h2 style="font-size:22px; font-weight:900;">最近文章</h2>
+                    <span id="postCount" class="post-count">共 0 篇</span>
+                </div>
+                
+                <div class="list-header-right" style="display: flex; align-items: center; gap: 8px; position: relative;">
+                    
+                    <div class="list-search-container" style="display: flex; align-items: center; position: relative;">
+                        <div id="searchWrapper" class="expandable-search-wrapper">
+                           <input type="text" id="searchInput" class="search-input-field" placeholder="搜尋標題、內文、作者..." onkeydown="if(event.key==='Enter') { event.preventDefault(); this.dispatchEvent(new Event('input')); if(typeof filterArticles==='function') filterArticles(); }">
+                            <button id="clearSearchBtn" onclick="clearFilter()" class="inline-clear-btn hidden"><i class="fa-solid fa-circle-xmark"></i></button>
+                        </div>
+                        <button class="btn-icon" onclick="toggleSearchField()" title="開啟關鍵字搜尋" style="border: 1px solid var(--border-color); z-index: 2;">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </button>
+                    </div>
+
+                    <button id="themeToggle" class="btn-icon" title="切換深淺色模式" style="border: 1px solid var(--border-color);">
+                        <i class="fa-solid fa-sun hidden dark:inline-block"></i>
+                        <i class="fa-solid fa-moon inline-block dark:hidden"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div id="postsContainer" class="posts-container"></div>
+            <div id="emptyState" class="empty-state hidden">
+                <i class="fa-solid fa-mailbox"></i>
+                <p style="font-size:14px;">找不到相符的電子報內容。</p>
+            </div>
+        </section>
+    </main>
+
+    <div id="articlePage" class="main-content container hidden">
+        <button onclick="backToHome()" class="btn btn-text" style="font-weight:bold; margin-bottom:20px; padding:0;">
+            <i class="fa-solid fa-arrow-left"></i> <span>返回電子報列表</span>
+        </button>
+        
+        <article class="article-view">
+            <div class="card-tags">
+                <span id="detailIssue" onclick="filterByTag(this.innerText)" class="tag tag-issue" style="cursor:pointer;"></span>
+                <span id="detailCategory" onclick="filterByTag(this.innerText)" class="tag tag-category" style="cursor:pointer;"></span>
+                <span id="detailAuthor" onclick="filterByTag(this.getAttribute('data-val'))" class="tag tag-author" style="cursor:pointer;"></span>
+            </div>
+            
+            <h1 id="detailTitle" class="article-title"></h1>
+            
+            <div class="article-meta">
+                <span style="display:inline-flex; align-items:center; gap:4px;"><i class="fa-regular fa-clock"></i> <time id="detailDate"></time></span>
+                <span id="detailViewsContainer" class="hidden" style="color:var(--primary); display:inline-flex; align-items:center; gap:4px;"><i class="fa-solid fa-eye"></i> <span id="detailViews">0 次瀏覽</span></span>
+            </div>
+            
+            <p id="detailContent" class="article-body"></p>
+
+            <div id="detailImgContainer" class="hidden" style="margin-top:24px; padding-top:16px; border-top:1px solid var(--border-color);"></div>
+        </article>
+    </div>
+
+    <div id="pwdModal" class="modal-mask hidden">
+        <div class="modal-card" id="modalCard">
+            <div class="modal-header">
+                <h3 id="modalTitle" style="font-weight:bold;">身分驗證</h3>
+                <button onclick="closeModal()" class="btn-icon" style="padding:4px;"><i class="fa-solid fa-xmark" style="font-size:16px;"></i></button>
+            </div>
+            
+            <div id="loginForm">
+                <p style="color:var(--text-muted); font-size:14px; margin-bottom:16px;">請輸入管理員密碼以解鎖編輯功能。<br><span style="color:var(--amber); font-weight:500; font-size:12px;">（預設為：admin123）</span></p>
+                <input type="password" id="adminPwd" class="form-control" style="width:100%; margin-bottom:8px; padding:12px;" placeholder="輸入密碼..." onkeydown="if(event.key==='Enter') verifyPassword()">
+            </div>
+            
+            <div id="changePwdForm" class="hidden" style="display:flex; flex-direction:column; gap:12px;">
+                <div class="form-group">
+                    <label>新管理密碼</label>
+                    <input type="password" id="newPwd1" class="form-control" style="padding:12px;" placeholder="請輸入新密碼...">
+                </div>
+                <div class="form-group">
+                    <label>再次確認新密碼</label>
+                    <input type="password" id="newPwd2" class="form-control" style="padding:12px;" placeholder="請再次輸入新密碼...">
+                </div>
+            </div>
+            
+            <div id="pwdError" class="modal-error hidden">
+                <i class="fa-solid fa-circle-exclamation"></i> <span id="errorText">密碼錯誤。</span>
+            </div>
+            
+            <div class="flex-row-end" style="margin-top:16px; padding-top:16px;">
+                <button onclick="closeModal()" class="btn btn-text">取消</button>
+                <button id="modalSubmitBtn" onclick="verifyPassword()" class="btn btn-primary">確認解鎖</button>
+            </div>
+        </div>
+    </div>
+
+    <footer id="global-footer" class="custom-footer"></footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+    <script>
+// ==========================================
+// 1. 全域變數定義（務必放在最頂端）
+// ==========================================
+let adminPassword = localStorage.getItem('admin_pwd') || "admin123";
+let searchQuery = "";
+let isAdminMode = false;              
+let editingPostId = null;            // 記錄目前正在編輯的 Supabase 文章 ID
+let currentUploadedImagesArray = []; 
+let currentCarouselIndex = 0;
+let posts = [];                      // 統一由 Supabase 實時載入的陣列
+
+// ==========================================
+// 2. Supabase 設定與連線
+// ==========================================
+const supabaseUrl = 'https://blqlrxqckiuvgevmakbu.supabase.co';
+const supabaseKey = 'sb_publishable_qFXwpuGChVdRwjc9K7prVQ_PgYmlnpG';
+const TABLE_NAME = 'newletters'; 
+const client = supabase.createClient(supabaseUrl, supabaseKey);
+
+// ==========================================
+// 3. 程式初始化載入入口
+// ==========================================
+document.addEventListener('DOMContentLoaded', () => {
+    initTheme();
+    initSupabaseRealtime();          // 啟動 Supabase 實時同步與首次載入
+    loadHeaderAndFooter();           // 載入外部元件
+});
+
+// ==========================================
+// 4. 核心功能：全域 Window 事件綁定
+// ==========================================
+
+// 利用全域委託，直接處理所有點擊事件（包含非同步載入的 header 元件）
+document.addEventListener('click', (e) => {
+    // 1. 深淺色切換
+    if (e.target.closest('#themeToggle')) {
+        document.documentElement.classList.toggle('dark');
+        localStorage.theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+        return;
+    }
+    // 2. Logo 管理員解鎖按鈕
+    if (e.target.closest('#logoAdminBtn')) {
+        handleAdminClick();
+        return;
+    }
+});
+
+// 監聽全域輸入事件（搜尋框）
+document.addEventListener('input', (e) => {
+    if (e.target.id === 'searchInput') {
+        searchQuery = e.target.value.toLowerCase().trim();
+        toggleClearBtn();
+        renderPosts();
+    }
+});
+
+// 補上這段：讓搜尋框按下 Enter 時也能觸發搜尋
+document.addEventListener('keydown', (e) => {
+    if (e.target.id === 'searchInput' && e.key === 'Enter') {
+        e.preventDefault(); // 防止預設行為（例如表單提交或網頁重新整理）
+        
+        // 把你原本 input 裡做的事情在這裡再執行一次
+        searchQuery = e.target.value.toLowerCase().trim();
+        toggleClearBtn();
+        renderPosts();
+    }
+});
+
+// 監聽全域變更事件（上傳圖片）
+document.addEventListener('change', (e) => {
+    if (e.target.id === 'postImage') {
+        const files = e.target.files;
+        if (files.length > 0) {
+            document.getElementById('imgPreviewContainer').classList.remove('hidden');
+            document.getElementById('clearImgBtn').classList.remove('hidden');
+            
+            Array.from(files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    currentUploadedImagesArray.push(event.target.result);
+                    renderFormImagePreviews();
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+    }
+});
+
+// ==========================================
+// 5. 核心功能：Supabase 資料邏輯 (CRUD)
+// ==========================================
+
+function initSupabaseRealtime() {
+    fetchArticles(); // 首次載入撈取歷史文章
+
+    client
+        .channel('schema-db-changes')
+        .on(
+            'postgres_changes',
+            { event: '*', schema: 'public', table: TABLE_NAME },
+            (payload) => {
+                console.log('資料庫實時變動：', payload);
+                fetchArticles(); // 即時重拉並渲染
+                
+                // 檢查是否為更新事件，且使用者目前正開啟詳細文章頁面
+                if (payload.eventType === 'UPDATE' && !document.getElementById('articlePage').classList.contains('hidden')) {
+                     if (window.currentViewingArticleId === payload.new.id) {
+                         
+                         // 🛠️ 1. 內文安全防禦：只有當實時廣播裡面有 content 欄位時才更新，沒有就絕對不亂動
+                         if (typeof payload.new.content !== 'undefined' && payload.new.content !== null) {
+                             const finalContent = payload.new.content || payload.new.Content || payload.new.CONTENT || payload.new.內容;
+                             document.getElementById('detailContent').innerText = finalContent;
+                             document.getElementById('detailContent').style.whiteSpace = 'pre-wrap'; // 保持換行格式
+                         } else {
+                             console.log('💡 實時更新通知缺乏內文欄位，已自動忽略內文覆蓋，防止變為 undefined。');
+                         }
+
+                         // 🛠️ 2. 其他欄位安全防禦：同樣只有當這些欄位有傳回新值時才更新，避免被其他部分的 update 意外洗掉
+                         if (payload.new.title) {
+                             document.getElementById('detailTitle').innerText = payload.new.title;
+                         }
+                         if (typeof payload.new.issue !== 'undefined') {
+                             document.getElementById('detailIssue').innerText = payload.new.issue || "特刊";
+                         }
+                         if (payload.new.category) {
+                             document.getElementById('detailCategory').innerText = payload.new.category || "一般";
+                         }
+                         if (payload.new.author) {
+                             document.getElementById('detailAuthor').innerText = `作者：${payload.new.author || '客舍編輯部'}`;
+                             document.getElementById('detailAuthor').setAttribute('data-val', payload.new.author || '客舍編輯部');
+                         }
+                         if (payload.new.date) {
+                             document.getElementById('detailDate').innerText = payload.new.date;
+                         }
+                         
+                         // 🛠️ 3. 實時同步更新瀏覽次數（因為 update views 時這個欄位一定有值）
+                         if (typeof payload.new.views !== 'undefined' && document.getElementById('detailViews')) {
+                             document.getElementById('detailViews').innerText = `${payload.new.views} 次瀏覽`;
+                         }
+                     }
+                }
+            }
+        )
+        .subscribe();
+}
+
+async function fetchArticles() {
+    const { data: supabaseData, error } = await client
+        .from(TABLE_NAME)
+        .select('*')
+        .order('id', { ascending: false }); 
+
+    if (error) {
+        console.error('資料撈取失敗:', error.message);
+        return;
+    }
+    posts = supabaseData;
+    renderPosts();
+}
+
+// 🛠️ 整合與修正：新增與修改文章
+async function submitArticleForm(event) {
+    if (event) event.preventDefault(); // 防止網頁重新整理
+    if (!isAdminMode) return;
+
+    const title = document.getElementById('postTitle').value.trim();
+    const author = document.getElementById('postAuthor').value.trim() || "客舍編輯部";
+    const issue = document.getElementById('postIssue').value.trim() || "特刊";
+    const category = document.getElementById('postCategory').value.trim() || "一般";
+    const content = document.getElementById('postContent').value.trim();
+
+    if (!title || !content) {
+        alert('標題與內文皆不能留空！');
+        return;
+    }
+
+    const articleData = {
+        title: title,
+        author: author,
+        issue: issue,
+        category: category,
+        content: content,
+        images: [...currentUploadedImagesArray]
+    };
+
+    try {
+        if (editingPostId !== null) {
+            // 【修改現有文章】
+            const { error } = await client
+                .from(TABLE_NAME)
+                .update(articleData)
+                .eq('id', editingPostId);
+
+            if (error) throw error;
+            alert('文章內容修改成功！');
+            resetForm();
+        } else {
+            // 【發布新文章】
+            const now = new Date();
+            articleData.date = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+            articleData.views = 0;
+
+            const { error } = await client
+                .from(TABLE_NAME)
+                .insert([articleData]);
+
+            if (error) throw error;
+            alert('客舍電子報發布成功！');
+            resetForm();
+        }
+        
+        // 重新回到列表頂端或重刷畫面
+        if (typeof backToHome === 'function') backToHome();
+
+    } catch (error) {
+        console.error('Supabase 詳細錯誤完整內容：', error);
+        alert('操作失敗，原因: ' + error.message + ' (詳細請看 F12 Console)');
+    }
+}
+
+// 🛠️ 新增：刪除文章功能
+async function deletePost(id, event) {
+    if (event) event.stopPropagation(); // 防止點擊刪除時觸發卡片的「點擊查看詳細」
+
+    if (!isAdminMode) {
+        alert('權限不足，只有管理員可以刪除文章！');
+        return;
+    }
+
+    if (!confirm('您確定要刪除這篇文章嗎？此動作將無法復原！')) return;
+
+    try {
+        const { error } = await client
+            .from(TABLE_NAME)
+            .delete()
+            .eq('id', id);
+
+        if (error) throw error;
+
+        alert('文章已成功刪除！');
+
+        // 如果目前詳細頁面正好開著這篇文章，把它關掉回到首頁
+        if (window.currentViewingArticleId === id) {
+            backToHome();
+        }
+        
+        await fetchArticles();
+
+    } catch (err) {
+        console.error('刪除失敗:', err);
+        alert('刪除失敗: ' + err.message);
+    }
+}
+
+async function navigateToArticle(id) {
+    // 1. 先從全域變數 posts 裡面找這篇文章
+    let post = posts.find(p => p.id === id); 
+
+    // 如果記憶體中沒有或不完整，先去 Supabase 撈
+    if (!post || typeof post.content === 'undefined' || post.content === null) {
+        const { data } = await client.from(TABLE_NAME).select('*').eq('id', id).single();
+        if (data) post = data;
+    }
+
+    if (!post) {
+        alert('找不到該文章的詳細資料！');
+        return;
+    }
+
+    window.currentViewingArticleId = id;
+
+    // 🛠️ 【關鍵修正 1】：把 post 複製一份出來（深度拷貝），斷開跟全域變數的連動
+    // 這樣後面不管是即時監聽還是重新撈取，都不會影響到我們現在手上這份要顯示的資料！
+    const currentPostData = JSON.parse(JSON.stringify(post));
+
+    // 🛠️ 【關鍵修正 2】：更新瀏覽量的動作「不要用 await 擋在前面」
+    // 讓它在背景默默去更新就好，不要影響畫面的渲染流程
+    const newViews = (currentPostData.views || 0) + 1;
+    client.from(TABLE_NAME).update({ views: newViews }).eq('id', id)
+        .then(() => {
+            console.log('背景瀏覽量更新成功');
+        })
+        .catch(err => console.error('瀏覽量更新失敗:', err));
+
+    // 🛠️ 【關鍵修正 3】：底下所有欄位賦值，全部改用複製出來的 `currentPostData`
+    document.getElementById('detailTitle').innerText = currentPostData.title || '無標題';
+    document.getElementById('detailIssue').innerText = currentPostData.issue || "特刊";
+    document.getElementById('detailCategory').innerText = currentPostData.category || "一般";
+    document.getElementById('detailAuthor').innerText = `作者：${currentPostData.author || '客舍編輯部'}`;
+    document.getElementById('detailAuthor').setAttribute('data-val', currentPostData.author || '客舍編輯部');
+    document.getElementById('detailDate').innerText = currentPostData.date || '';
+
+    const detailContentEl = document.getElementById('detailContent');
+    if (detailContentEl) {
+        // 使用隔離後的資料
+        const finalContent = currentPostData.content || currentPostData.Content || currentPostData.CONTENT || currentPostData.內容 || '無內文描述';
+        detailContentEl.innerText = finalContent;
+        detailContentEl.style.whiteSpace = 'pre-wrap';
+    }
+    
+    // 底下的圖片與頁面切換逻辑...（一樣把裡面的 post.images 改成 currentPostData.images 即可）
+    const detailImgBox = document.getElementById('detailImgContainer');
+    const postImages = currentPostData.images || (currentPostData.image ? [currentPostData.image] : []);
+
+    if (postImages && postImages.length > 0) {
+        detailImgBox.classList.remove('hidden');
+        if (postImages.length === 1) {
+            detailImgBox.innerHTML = `<img src="${postImages[0]}" style="width:100%; max-height:500px; object-fit:contain; border-radius:12px; background-color:var(--bg-main); padding:4px; border:1px solid var(--border-color);">`;
+        } else {
+            currentCarouselIndex = 0;
+            window.currentArticleImages = postImages;
+            renderCarouselHTML();
+        }
+    } else {
+        detailImgBox.innerHTML = '';
+        detailImgBox.classList.add('hidden');
+    }
+
+    const viewsBox = document.getElementById('detailViewsContainer');
+    if (isAdminMode) {
+        document.getElementById('detailViews').innerText = `${newViews} 次瀏覽`;
+        viewsBox.classList.remove('hidden');
+    } else {
+        viewsBox.classList.add('hidden');
+    }
+
+    document.getElementById('homePage').classList.add('hidden');
+    document.getElementById('articlePage').classList.remove('hidden');
+    window.scrollTo({ top: 0, behavior: 'instant' });
+}
+
+// ==========================================
+// 6. 介面與輔助工具功能
+// ==========================================
+
+function initTheme() {
+    if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+    } else {
+        document.documentElement.classList.remove('dark');
+    }
+}
+
+function toggleSearchField() {
+    const wrapper = document.getElementById('searchWrapper');
+    const input = document.getElementById('searchInput');
+    wrapper.classList.toggle('open');
+    if(wrapper.classList.contains('open')) {
+        setTimeout(() => input.focus(), 150);
+    }
+}
+
+function handleAdminClick() {
+    if (!isAdminMode) {
+        openModal('login');
+    } else {
+        if (confirm('確定要退出管理員後台模式嗎？')) {
+            exitAdminMode();
+        }
+    }
+}
+
+function renderFormImagePreviews() {
+    const grid = document.getElementById('imgPreviewGrid');
+    if (currentUploadedImagesArray.length === 0) {
+        document.getElementById('imgPreviewContainer').classList.add('hidden');
+        document.getElementById('clearImgBtn').classList.add('hidden');
+        grid.innerHTML = '';
+        return;
+    }
+    grid.innerHTML = currentUploadedImagesArray.map((img, index) => `
+        <div class="preview-item">
+            <img src="${img}">
+            <button onclick="removeSingleImageFromForm(${index})" class="preview-delete" title="刪除">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+    `).join('');
+}
+
+function removeSingleImageFromForm(index) {
+    currentUploadedImagesArray.splice(index, 1);
+    renderFormImagePreviews();
+}
+
+function clearImageInput() {
+    document.getElementById('postImage').value = "";
+    currentUploadedImagesArray = [];
+    renderFormImagePreviews();
+}
+
+function filterByTag(val) {
+    if(!val) return;
+    backToHome();
+    const cleanedVal = val.replace('作者：', '').trim();
+    
+    document.getElementById('searchWrapper').classList.add('open');
+    document.getElementById('searchInput').value = cleanedVal;
+    searchQuery = cleanedVal.toLowerCase();
+    toggleClearBtn();
+    renderPosts();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function clearFilter() {
+    document.getElementById('searchInput').value = "";
+    searchQuery = "";
+    toggleClearBtn();
+    renderPosts();
+}
+
+function toggleClearBtn() {
+    const btn = document.getElementById('clearSearchBtn');
+    if (searchQuery) btn.classList.remove('hidden'); else btn.classList.add('hidden');
+}
+
+function openModal(mode = 'login') {
+    const modal = document.getElementById('pwdModal');
+    const card = document.getElementById('modalCard');
+    const title = document.getElementById('modalTitle');
+    const loginForm = document.getElementById('loginForm');
+    const changeForm = document.getElementById('changePwdForm');
+    const submitBtn = document.getElementById('modalSubmitBtn');
+
+    modal.classList.remove('hidden');
+    if (mode === 'login') {
+        title.innerText = "管理員登入";
+        loginForm.classList.remove('hidden');
+        changeForm.classList.add('hidden');
+        submitBtn.innerText = "確認解鎖";
+        submitBtn.setAttribute('onclick', 'verifyPassword()');
+        setTimeout(() => document.getElementById('adminPwd').focus(), 150);
+    } else {
+        title.innerText = "變更管理密碼";
+        loginForm.classList.add('hidden');
+        changeForm.classList.remove('hidden');
+        submitBtn.innerText = "儲存新密碼";
+        submitBtn.setAttribute('onclick', 'saveNewPassword()');
+        setTimeout(() => document.getElementById('newPwd1').focus(), 150);
+    }
+    setTimeout(() => card.classList.add('active'), 10);
+}
+
+function closeModal() {
+    const modal = document.getElementById('pwdModal');
+    const card = document.getElementById('modalCard');
+    card.classList.remove('active');
+    document.getElementById('pwdError').classList.add('hidden');
+    document.getElementById('adminPwd').value = '';
+    document.getElementById('newPwd1').value = '';
+    document.getElementById('newPwd2').value = '';
+    setTimeout(() => modal.classList.add('hidden'), 300);
+}
+
+function verifyPassword() {
+    if (document.getElementById('adminPwd').value === adminPassword) {
+        enterAdminMode();
+        closeModal();
+    } else {
+        showError('密碼錯誤，請再試一次。');
+    }
+}
+
+function saveNewPassword() {
+    const p1 = document.getElementById('newPwd1').value;
+    const p2 = document.getElementById('newPwd2').value;
+    if (!p1.trim()) { showError('新密碼不能為空！'); return; }
+    if (p1 !== p2) { showError('兩次輸入的新密碼不相符。'); return; }
+    adminPassword = p1;
+    localStorage.setItem('admin_pwd', p1);
+    alert('管理密碼修改成功！');
+    closeModal();
+}
+
+function showError(msg) {
+    const errHint = document.getElementById('pwdError');
+    document.getElementById('errorText').innerText = msg;
+    errHint.classList.remove('hidden');
+}
+
+function enterAdminMode() {
+    isAdminMode = true;
+    document.getElementById('adminPanel').classList.remove('hidden');
+    document.getElementById('backupPanel').classList.remove('hidden');
+    const logoBtn = document.getElementById('logoAdminBtn');
+    if (logoBtn) logoBtn.title = "後台管理中 (點擊退出)";
+    renderPosts();
+}
+
+function exitAdminMode() {
+    isAdminMode = false;
+    document.getElementById('adminPanel').classList.add('hidden');
+    document.getElementById('backupPanel').classList.add('hidden');
+    const logoBtn = document.getElementById('logoAdminBtn');
+    if (logoBtn) logoBtn.title = "管理員模式切換";
+    resetForm();
+    renderPosts();
+}
+
+function renderCarouselHTML() {
+    const imgs = window.currentArticleImages;
+    const container = document.getElementById('detailImgContainer');
+    container.innerHTML = `
+        <p style="font-size:11px; color:var(--text-light); text-align:center; margin-bottom:8px;" class="hidden-desktop"><i class="fa-solid fa-hand-pointer" style="animation: pulse 2s infinite;"></i> 左右滑動可觀看更多相片 (${imgs.length}張)</p>
+        <div class="carousel-desktop">
+            <img id="carouselImg" src="${imgs[currentCarouselIndex]}" style="transition: all 0.2s;">
+            <button onclick="switchCarousel(-1)" class="carousel-btn prev"><i class="fa-solid fa-chevron-left"></i></button>
+            <button onclick="switchCarousel(1)" class="carousel-btn next"><i class="fa-solid fa-chevron-right"></i></button>
+            <div class="carousel-indicator"><span id="carouselIndexText">${currentCarouselIndex + 1}</span> / ${imgs.length}</div>
+        </div>
+        <div class="carousel-mobile no-scrollbar">
+            ${imgs.map(src => `<div class="carousel-mobile-item"><img src="${src}"></div>`).join('')}
+        </div>
+    `;
+}
+
+function switchCarousel(direction) {
+    const imgs = window.currentArticleImages;
+    currentCarouselIndex += direction;
+    if (currentCarouselIndex < 0) currentCarouselIndex = imgs.length - 1;
+    if (currentCarouselIndex >= imgs.length) currentCarouselIndex = 0;
+    document.getElementById('carouselImg').src = imgs[currentCarouselIndex];
+    document.getElementById('carouselIndexText').innerText = currentCarouselIndex + 1;
+}
+
+function backToHome() {
+    document.getElementById('articlePage').classList.add('hidden');
+    document.getElementById('homePage').classList.remove('hidden');
+    renderPosts();
+}
+
+function startEditPost(id) {
+    const post = posts.find(p => p.id === id);
+    if (!post) return;
+
+    editingPostId = id;
+    document.getElementById('postTitle').value = post.title;
+    document.getElementById('postAuthor').value = post.author;
+    document.getElementById('postIssue').value = post.issue;
+    document.getElementById('postCategory').value = post.category;
+    document.getElementById('postContent').value = post.content;
+    
+    if (post.images && post.images.length > 0) {
+        currentUploadedImagesArray = [...post.images];
+        renderFormImagePreviews();
+    } else if (post.image) { 
+        currentUploadedImagesArray = [post.image];
+        renderFormImagePreviews();
+    } else {
+        clearImageInput();
+    }
+
+    document.getElementById('panelTitle').querySelector('span').innerText = "編輯/修改現有文章內容";
+    document.getElementById('submitBtnText').innerText = "確認儲存修改";
+    document.getElementById('cancelEditBtn').classList.remove('hidden');
+    window.scrollTo({ top: document.getElementById('adminPanel').offsetTop - 80, behavior: 'smooth' });
+}
+
+function resetForm() {
+    editingPostId = null;
+    document.getElementById('postTitle').value = '';
+    document.getElementById('postAuthor').value = '';
+    document.getElementById('postIssue').value = '';
+    document.getElementById('postCategory').value = '未分類';
+    document.getElementById('postContent').value = '';
+    clearImageInput();
+    document.getElementById('panelTitle').querySelector('span').innerText = "發布新電子報文章";
+    document.getElementById('submitBtnText').innerText = "立即發布文章";
+    document.getElementById('cancelEditBtn').classList.add('hidden');
+}
+
+function exportBackupJSON() {
+    if(posts.length === 0) {
+        alert('目前沒有任何文章可以匯出備份！');
+        return;
+    }
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(posts, null, 2));
+    const downloadAnchor = document.createElement('a');
+    const now = new Date();
+    const dateStr = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
+    
+    downloadAnchor.setAttribute("href", dataStr);
+    downloadAnchor.setAttribute("download", `客舍電子報備份_${dateStr}.json`);
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
+}
+
+async function importBackupJSON(inputElement) {
+    const file = inputElement.files[0];
+    if (!file) return;
+
+    if (!confirm('匯入備份會將目前的文章資料完全覆蓋至雲端，確定要執行嗎？')) {
+        inputElement.value = '';
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = async function(e) {
+        try {
+            const importedData = JSON.parse(e.target.result);
+            if (Array.isArray(importedData)) {
+                const { error: delError } = await client.from(TABLE_NAME).delete().neq('id', 0);
+                if (delError) throw delError;
+
+                const cleanedData = importedData.map(({ id, ...rest }) => rest);
+                const { error: insError } = await client.from(TABLE_NAME).insert(cleanedData);
+                if (insError) throw insError;
+
+                alert(`雲端還原成功！共匯入 ${importedData.length} 篇電子報文章！`);
+            } else {
+                alert('匯入失敗：這不是正確的客舍備份檔案格式。');
+            }
+        } catch (err) {
+            alert('讀取或同步至雲端發生錯誤：' + err.message);
+        }
+        inputElement.value = '';
+    };
+    reader.readAsText(file);
+}
+
+// 🛠️ 整合與修正：優化主頁文章卡片渲染（加入管理員可見的「修改」與「刪除」按鈕）
+function renderPosts() {
+    const container = document.getElementById('postsContainer');
+    const emptyState = document.getElementById('emptyState');
+    
+    if (!container) return;
+
+    // 🛠️ 【1. 核心修改點：在這裡加入搜尋過濾邏輯】
+    let displayedPosts = posts || [];
+    if (typeof searchQuery !== 'undefined' && searchQuery !== '') {
+        displayedPosts = posts.filter(post => {
+            const title = (post.title || '').toLowerCase();
+            const content = (post.content || '').toLowerCase();
+            const author = (post.author || '').toLowerCase();
+            
+            // 同時搜尋標題、內文與作者
+            return title.includes(searchQuery) || 
+                   content.includes(searchQuery) || 
+                   author.includes(searchQuery);
+        });
+    }
+
+    // 🛠️ 【2. 修改點：判斷是否顯示空狀態，改用過濾後的 displayedPosts】
+    if (displayedPosts.length === 0) {
+        container.innerHTML = '';
+        if (emptyState) emptyState.classList.remove('hidden');
+        
+        // 搜尋不到文章時，文章總數顯示 0
+        const countBadge = document.getElementById('postCount');
+        if (countBadge) countBadge.innerText = `共 0 篇`;
+        return;
+    }
+
+    if (emptyState) emptyState.classList.add('hidden');
+
+    // 🛠️ 【3. 修改點：將 posts.map 改為 displayedPosts.map】
+    container.innerHTML = displayedPosts.map(post => {
+        let summaryText = '無內文描述';
+        if (post.content) {
+            summaryText = post.content.replace(/<[^>]*>/g, '').substring(0, 60) + '...';
+        }
+
+        // 💡 判斷：如果是管理員模式，卡片下方就自動秀出修改與刪除按鈕
+        let adminButtonsHTML = '';
+        if (isAdminMode) {
+            adminButtonsHTML = `
+                <div class="card-admin-actions" style="margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border-color); display: flex; gap: 8px; justify-content: flex-end;">
+                    <button onclick="event.stopPropagation(); startEditPost(${post.id})" class="btn btn-sky" style="padding: 4px 8px; font-size: 12px;">
+                        <i class="fa-solid fa-pen-to-square"></i> 修改
+                    </button>
+                    <button onclick="deletePost(${post.id}, event)" class="btn btn-red" style="padding: 4px 8px; font-size: 12px; background-color: #ef4444; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                        <i class="fa-solid fa-trash-can"></i> 刪除
+                    </button>
+                </div>
+            `;
+        }
+
+        return `
+            <div class="post-card" onclick="navigateToArticle(${post.id})" style="cursor: pointer;">
+                <div class="card-tags">
+                    <span class="tag tag-issue">第 ${post.issue || '0'} 期</span>
+                    <span class="tag tag-category">${post.category || '未分類'}</span>
+                    <span class="tag tag-author"><i class="fa-solid fa-user"></i> ${post.author || '匿名'}</span>
+                </div>
+
+                <div class="card-title">${post.title || '無標題'}</div>
+
+                <div class="card-body">
+                    <p style="margin: 0; color: var(--text-muted);">${summaryText}</p>
+                </div>
+
+                <div class="card-footer">
+                    <span class="tag-info"><i class="fa-regular fa-clock"></i> ${post.date || ''}</span>
+                    <span class="tag-info"><i class="fa-regular fa-eye"></i> ${post.views || 0} 次瀏覽</span>
+                </div>
+                ${adminButtonsHTML}
+            </div>
+        `;
+    }).join('');
+
+    // 🛠️ 【4. 修改點：總數同步對應過濾後的篇數】
+    const countBadge = document.getElementById('postCount');
+    if (countBadge) {
+        countBadge.innerText = `共 ${displayedPosts.length} 篇`;
+    }
+}
+
+function loadHeaderAndFooter() {
+    fetch('header.html')
+        .then(response => response.text())
+        .then(data => {
+            const container = document.getElementById('header-container');
+            if(container) {
+                container.innerHTML = data;
+                setupHeaderMenu();
+            }
+        });
+
+    fetch('footer.html')
+        .then(response => response.text())
+        .then(data => {
+            const footerContainer = document.getElementById('global-footer');
+            if(footerContainer) {
+                footerContainer.innerHTML = data;
+                const yearSpan = document.getElementById('current-year');
+                if (yearSpan) yearSpan.textContent = new Date().getFullYear();
+            }
+        });
+}
+
+function setupHeaderMenu() {
+    const toggleButton = document.querySelector('.menu-toggle');
+    const navLinks = document.querySelector('.nav-links');
+    if (toggleButton && navLinks) {
+        toggleButton.addEventListener('click', (e) => {
+            navLinks.classList.toggle('active');
+            e.stopPropagation();
+        });
+        document.addEventListener('click', (e) => {
+            if (navLinks.classList.contains('active') && !navLinks.contains(e.target) && e.target !== toggleButton) {
+                navLinks.classList.remove('active');
+            }
+        });
+    }
+}
+
+function exportToExcel() {
+    if (!posts || posts.length === 0) {
+        alert('目前沒有任何文章資料可供匯出！');
+        return;
+    }
+
+    try {
+        const excelData = posts.map(post => ({
+            '文章ID': post.id,
+            '期別': `第 ${post.issue || 0} 期`,
+            '分類': post.category || '未分類',
+            '標題': post.title || '無標題',
+            '作者': post.author || '匿名',
+            '發布日期': post.date || '',
+            '瀏覽次數': post.views || 0,
+            '文章內容摘要': post.content ? post.content.substring(0, 300) : '無內文'
+        }));
+
+        const workbook = XLSX.utils.book_new();
+        const worksheet = XLSX.utils.json_to_sheet(excelData);
+
+        XLSX.utils.book_append_sheet(workbook, worksheet, "電子報文章列表");
+
+        const maxColumns = Object.keys(excelData[0]).length;
+        worksheet['!cols'] = Array(maxColumns).fill({ wch: 20 });
+
+        const currentDate = new Date().toISOString().split('T')[0];
+        XLSX.writeFile(workbook, `客舍電子報資料備份_${currentDate}.xlsx`);
+
+    } catch (error) {
+        console.error('Excel 匯出失敗:', error);
+        alert('匯出 Excel 過程中發生錯誤: ' + error.message);
+    }
+}
+
+// 🛠️ 整合與修正：萬能安全版 Excel 匯入
+async function handleExcelImport(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (typeof isAdminMode !== 'undefined' && !isAdminMode) {
+        alert('權限不足，只有管理員可以匯入資料！');
+        return;
+    }
+
+    if (!confirm(`確定要匯入「${file.name}」內的文章資料嗎？`)) {
+        event.target.value = '';
+        return;
+    }
+
+    const reader = new FileReader();
+    
+    reader.onload = async function(e) {
+        try {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            
+            const firstSheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[firstSheetName];
+            
+            const rawData = XLSX.utils.sheet_to_json(worksheet);
+            
+            if (rawData.length === 0) {
+                alert('Excel 檔案內沒有偵測到任何資料！');
+                return;
+            }
+
+            const articlesToInsert = rawData.map((row, idx) => {
+                let rawDate = row.date || row.發布日期;
+                let postDate = '';
+
+                try {
+                    if (rawDate) {
+                        if (typeof rawDate === 'number') {
+                            const utc_days  = Math.floor(rawDate - 25569);
+                            const utc_value = utc_days * 86400;
+                            const date_info = new Date(utc_value * 1000);
+                            
+                            if (!isNaN(date_info.getTime())) {
+                                postDate = `${date_info.getFullYear()}-${String(date_info.getMonth() + 1).padStart(2, '0')}-${String(date_info.getDate()).padStart(2, '0')}`;
+                            }
+                        } else if (typeof rawDate === 'string') {
+                            let cleaned = rawDate.trim().replace(/\//g, '-');
+                            if (cleaned.match(/^\d{4}-\d{1,2}-\d{1,2}$/)) {
+                                const parts = cleaned.split('-');
+                                postDate = `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`;
+                            } else {
+                                postDate = cleaned;
+                            }
+                        }
+                    }
+                } catch (dateErr) {
+                    console.warn(`第 ${idx + 2} 列的日期解析遇到小問題，將自動轉為今日。`, dateErr);
+                }
+
+                if (!postDate || postDate === 'Invalid Date') {
+                    const now = new Date();
+                    postDate = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+                }
+
+                return {
+                    title: String(row.title || row.標題 || '未命名文章').trim(),
+                    author: String(row.author || row.作者 || '匿名').trim(),
+                    issue: String(row.issue || row.期別 || '特刊'),
+                    category: String(row.category || row.分類 || '一般').trim(),
+                    content: String(row.content || row.內容 || '無內文').trim(),
+                    date: postDate, 
+                    views: 0,
+                    images: []
+                };
+            });
+
+            console.log('準備寫入 Supabase 的資料：', articlesToInsert);
+
+            const { error } = await client
+                .from(TABLE_NAME)
+                .insert(articlesToInsert);
+
+            if (error) throw error;
+
+            alert(`成功匯入 ${articlesToInsert.length} 篇文章！頁面將自動更新。`);
+            
+            if (typeof fetchArticles === 'function') {
+                await fetchArticles();
+            }
+
+        } catch (err) {
+            console.error('Excel 匯入失敗:', err);
+            alert('匯入失敗，請檢查 Excel 格式是否正確。\n錯誤訊息: ' + err.message);
+        } finally {
+            event.target.value = '';
+        }
+    };
+
+    reader.readAsArrayBuffer(file);
+}
+
+
+// 綁定全域 window 函數以供 HTML 行內事件（如 onclick）調用
+window.removeSingleImageFromForm = removeSingleImageFromForm;
+window.filterByTag = filterByTag;
+window.navigateToArticle = navigateToArticle;
+window.startEditPost = startEditPost;
+window.deletePost = deletePost;
+window.submitArticleForm = submitArticleForm;
+window.handleExcelImport = handleExcelImport;
+window.saveNewPassword = saveNewPassword;
+window.verifyPassword = verifyPassword;
+window.closeModal = closeModal;
+window.switchCarousel = switchCarousel;
+window.backToHome = backToHome;
+window.clearFilter = clearFilter;
+window.toggleSearchField = toggleSearchField;
+
+// 🕵️‍♂️ 靈異現象調查工具：強行監控 #detailContent 的文字變化
+(function() {
+    const target = document.getElementById('detailContent');
+    if (!target) {
+        console.log('❌ 偵測工具啟動失敗：找不到 #detailContent 元素，請確保網頁已載入');
+        return;
+    }
+
+    console.log('🕵️‍♂️ 偵測工具已成功掛載！正在嚴密監控內文變化...');
+
+    // 備份原本的 innerText 與 textContent
+    const originalDescriptor = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'innerText');
+    
+    Object.defineProperty(target, 'innerText', {
+        get: function() {
+            return originalDescriptor.get.call(this);
+        },
+        set: function(value) {
+            console.log(`🚨【內文變更警報】有人試圖將內文修改為: "${value}"`);
+            if (value === 'undefined' || value === undefined || value === '無內文描述') {
+                console.error('💥 抓到你了！以下是把內文變成 undefined 的犯人呼叫棧（Call Stack）：');
+                console.trace(); // 🔥 這行會在主控台印出到底是哪一行程式碼把它變不見的！
+            }
+            originalDescriptor.set.call(this, value);
+        }
+    });
+})();
+
+// ==========================================
+// 1. 載入頁首（融合「更多」自動收納邏輯）
+// ==========================================
+fetch('header.html')
+    .then(response => response.text())
+    .then(data => {
+        const container = document.getElementById('header-container');
+        if (container) {
+            container.innerHTML = data;
+            setupHeaderMenu(); // 🛠️ 載入完成後，啟動選單核心與自動收納功能
+        }
+    })
+    .catch(err => console.error("頁首載入失敗:", err));
+
+// ==========================================
+// 2. 載入頁尾並處理年份（維持原樣）
+// ==========================================
+fetch('footer.html')
+    .then(response => response.text())
+    .then(data => {
+        const footerContainer = document.getElementById('global-footer');
+        if (footerContainer) {
+            footerContainer.innerHTML = data;
+            
+            // 頁尾載入完成後，更新年份
+            const yearSpan = document.getElementById('current-year');
+            if (yearSpan) {
+                yearSpan.textContent = new Date().getFullYear();
+            }
+        }
+    })
+    .catch(err => console.error("頁尾載入失敗:", err));
+
+// ==========================================
+// 3. 定義 Header 選單邏輯（升級版演算法）
+// ==========================================
+function setupHeaderMenu() {
+    const toggleButton = document.querySelector('.menu-toggle');
+    const navLinks = document.querySelector('.header-nav-links');
+
+    // --- (A) 手機版漢堡選單開關邏輯 ---
+    if (toggleButton && navLinks) {
+        // 使用 onclick 確保不重複綁定事件
+        toggleButton.onclick = function(e) {
+            navLinks.classList.toggle('active');
+            e.stopPropagation();
+        };
+
+        document.onclick = function(e) {
+            if (navLinks.classList.contains('active') && !navLinks.contains(e.target) && e.target !== toggleButton) {
+                navLinks.classList.remove('active');
+            }
+        };
+    }
+
+    // --- (B) 智能偵測寬度：過長項目收進「更多」演算法 ---
+    const mainNav = document.querySelector('.header-nav-links'); // 抓取主導覽列容器
+    if (!mainNav) return;
+
+    // 1. 動態建立「更多」下拉選單結構（如果 header.html 裡面還沒有的話，JS 會自動補上）
+    let moreMenu = document.getElementById('more-menu');
+    let overflowLinks = document.getElementById('overflow-links');
+    
+    if (!moreMenu) {
+        moreMenu = document.createElement('div');
+        moreMenu.id = 'more-menu';
+        moreMenu.className = 'more-dropdown';
+        moreMenu.innerHTML = `
+            <a href="#" class="more-toggle" onclick="return false;">更多 ▾</a>
+            <div class="more-dropdown-content" id="overflow-links"></div>
+        `;
+        mainNav.appendChild(moreMenu);
+        overflowLinks = document.getElementById('overflow-links');
+    }
+
+    // 2. 找出所有原本的連結項目（排除掉「更多」按鈕本身）
+    // 💡 這裡會抓取 nav 裡面所有的 <a> 標籤作為選單項目
+    const allLinks = Array.from(mainNav.children).filter(el => el !== moreMenu && el.tagName === 'A');
+
+    // 3. 核心計算函式
+    function adjustNavItems() {
+        // 📱 如果是手機版（寬度 <= 768px），停止收納演算法，將所有項目還原給漢堡選單垂直排列
+        if (window.innerWidth <= 768) {
+            allLinks.forEach(item => mainNav.insertBefore(item, moreMenu));
+            moreMenu.style.display = 'none';
+            return;
+        }
+
+        // 💻 電腦版自動收納計算
+        moreMenu.style.display = 'none'; // 先隱藏「更多」
+        overflowLinks.innerHTML = '';    // 清空收納盒
+        allLinks.forEach(item => mainNav.insertBefore(item, moreMenu)); // 先把所有項目放回主列以便測量真實寬度
+
+        let navContainerWidth = mainNav.offsetWidth;
+        let totalWidth = 0;
+        let isOverflow = false;
+        const moreBtnWidth = 90; // 預留給「更多 ▾」按鈕出現時的寬度緩衝
+
+        for (let i = 0; i < allLinks.length; i++) {
+            const item = allLinks[i];
+
+            // 如果前面已經爆滿了，後面的項目直接丟進「更多」收納盒
+            if (isOverflow) {
+                overflowLinks.appendChild(item);
+                continue;
+            }
+
+            // 累加當前項目的寬度（包含外距）
+            const itemStyle = window.getComputedStyle(item);
+            const marginLeft = parseFloat(itemStyle.marginLeft) || 0;
+            const marginRight = parseFloat(itemStyle.marginRight) || 0;
+            totalWidth += item.offsetWidth + marginLeft + marginRight;
+
+            // 💡 關鍵判斷：如果目前的總寬度加上「更多」按鈕寬度超過了導覽列總寬
+            if (totalWidth + moreBtnWidth > navContainerWidth) {
+                isOverflow = true;
+                moreMenu.style.display = 'inline-block'; // 顯現「更多」
+                overflowLinks.appendChild(item);         // 將當前這個放進收納盒
+            }
+        }
+    }
+
+    // 4. 初始化執行，並綁定視窗縮放事件
+    adjustNavItems();
+    window.removeEventListener('resize', adjustNavItems); // 防重複綁定
+    window.addEventListener('resize', adjustNavItems);
+}
+
+
+    </script>
+</body>
+</html>

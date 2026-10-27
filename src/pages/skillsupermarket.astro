@@ -1,0 +1,1854 @@
+---
+// 匯入 Layout
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>客舍萬事屋 Slow Pace Skill Supermarker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    
+<style>
+        /* ==========================================
+           1. 全域與基礎排版樣式 (Global & Base)
+           ========================================== */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+            background-color: #fdfbf7;
+            min-height: 100vh;
+            color: #3A2E2B;
+            display: flex;
+            flex-direction: column;
+            padding-bottom: 3rem;
+        }
+        .hidden {
+            display: none !important;
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* ==========================================
+           2. 提示彈窗樣式 (Toast)
+           ========================================== */
+        .toast-notification {
+            position: fixed;
+            bottom: 2.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(28, 25, 23, 0.9);
+            color: #ffffff;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            z-index: 50;
+            text-align: center;
+            border: 1px solid rgba(68, 64, 60, 0.5);
+        }
+
+        /* ==========================================
+           3. 最高權限管理端樣式 (Admin Navbar)
+           ========================================== */
+        .admin-nav {
+            background-color: #ffffff;
+            border-bottom: 1px solid #fef3c7;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            z-index: 50;
+        }
+        .admin-nav-container {
+            max-width: 56rem;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+        @media (min-width: 768px) {
+            .admin-nav-container { padding: 1.5rem; }
+        }
+        .admin-title-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid #f3f4f6;
+            margin-bottom: 1rem;
+        }
+        .admin-title-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .admin-title-icon {
+            color: #d97706;
+            width: 1.25rem;
+            height: 1.25rem;
+        }
+        .admin-main-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #1f2937;
+        }
+        .btn-admin-close-nav {
+            color: #9ca3af;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-admin-close-nav:hover { color: #4b5563; }
+        .admin-close-icon { width: 1.25rem; height: 1.25rem; }
+        
+        .admin-logout-row {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        @media (min-width: 768px) {
+            .admin-logout-row { flex-direction: row; align-items: center; }
+        }
+        .admin-hint-text {
+            font-size: 0.75rem;
+            color: #9ca3af;
+        }
+        @media (min-width: 768px) {
+            .admin-hint-text { max-width: 28rem; }
+        }
+        .admin-password-code {
+            background-color: #f3f4f6;
+            padding: 0.125rem 0.25rem;
+            border-radius: 0.25rem;
+            color: #b45309;
+        }
+        .admin-input-group-wrapper {
+            display: flex;
+            gap: 0.5rem;
+            flex: 1 1 0%;
+            width: 100%;
+            max-width: 24rem;
+        }
+        .admin-password-input {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            background-color: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.75rem;
+            font-size: 0.75rem;
+            letter-spacing: 0.1em;
+        }
+        .admin-password-input:focus { outline: none; border-color: #f59e0b; }
+        
+        .btn-admin-login {
+            padding: 0.5rem 1rem;
+            background-color: #d97706;
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 0.75rem;
+            border-radius: 0.75rem;
+            white-space: nowrap;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-admin-login:hover { background-color: #b45309; }
+        
+        .admin-login-row {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        @media (min-width: 768px) {
+            .admin-login-row { flex-direction: row; align-items: flex-start; justify-content: space-between; }
+        }
+        .admin-success-badge {
+            background-color: #ecfdf5;
+            color: #065f46;
+            font-size: 0.75rem;
+            padding: 0.75rem;
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .admin-success-text { font-weight: 700; }
+        .admin-success-icon { width: 1rem; height: 1rem; flex-shrink: 0; }
+        
+        .admin-logout-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.5rem;
+            background-color: #f9fafb;
+            padding: 0.75rem;
+            border-radius: 1rem;
+            border: 1px solid #f3f4f6;
+            width: 100%;
+        }
+        @media (min-width: 768px) { .admin-logout-wrapper { width: auto; } }
+        
+        .btn-admin-logout {
+            padding: 0.5rem 0.75rem;
+            background-color: #fef2f2;
+            color: #dc2626;
+            font-size: 0.75rem;
+            font-weight: 700;
+            border-radius: 0.75rem;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-admin-logout:hover { background-color: #dc2626; color: #ffffff; }
+
+        /* ==========================================
+           4. 頁首與導覽區塊 (Header)
+           ========================================== */
+        .header-bar {
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid #fef3c7;
+            padding: 0.75rem 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 40;
+        }
+        .header-container {
+            max-width: 56rem;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .banner-logo-group {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+            user-select: none;
+        }
+        .banner-logo-img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            transition: opacity 0.2s;
+        }
+        .banner-logo-group:hover .banner-logo-img { opacity: 0.8; }
+        .banner-title-main {
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: #1f2937;
+            letter-spacing: 0.05em;
+            display: block;
+        }
+
+        .hero-banner {
+            text-align: center;
+        }
+
+        .hero-banner h1 {
+            font-size: 34px;
+            color: #4d361d;
+            display: block;
+            font-weight: bold;     /* 剛才加入的粗體 */
+            letter-spacing: 10px; /* 稍微放大字距，增加質感 */
+
+        }
+
+        .hero-title-sub {
+            font-size: 20px;
+            color: #4d361d;
+            display: block;
+            font-weight: bold;     /* 剛才加入的粗體 */
+            margin-top: -1.1rem;
+        }
+
+        .header-action-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .layout-action-row {
+            margin-left: auto;
+        }
+
+        /* ==========================================
+           5. 按鈕基本樣式 (Buttons)
+           ========================================== */
+        .btn-base {
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 0.5rem 1rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-stone { background-color: #1c1917; color: #ffffff; }
+        .btn-stone:hover { background-color: #0c0a09; }
+        .btn-orange { background-color: #ea580c; color: #ffffff; }
+        .btn-orange:hover { background-color: #c2410c; }
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #ea580c;
+            background-color: #ffffff;
+            padding: 0.5rem 1rem;
+            border-radius: 0.75rem;
+            border: 1px solid #fef3c7;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-back:hover { color: #c2410c; }
+        .btn-back-icon { width: 1rem; height: 1rem; }
+
+        /* ==========================================
+           6. 主要版面結構與主橫幅 (Layout & Banner)
+           ========================================== */
+        .main-layout {
+            width: 100%;
+            max-width: 56rem;
+            margin: 0 auto;
+            padding: 2rem 1rem 2rem 1rem;
+            flex: 1 1 0%;
+        }
+        @media (min-width: 768px) {
+            .main-layout { padding-left: 1.5rem; padding-right: 1.5rem; }
+        }
+        .single-layout {
+            width: 100%;
+            max-width: 42rem;
+            margin: 0 auto;
+            padding: 1.5rem 1rem 0 1rem;
+            flex: 1 1 0%;
+        }
+        .layout-spacing {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        .admin-status-badge {
+            text-align: center;
+            background-color: #fef3c7;
+            border: 1px solid #fde68a;
+            color: #92400e;
+            font-size: 0.75rem;
+            padding: 0.5rem;
+            border-radius: 0.75rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+        }
+        
+        /* 橫幅大圖 */
+        .hero-banner {
+            display: flex;          /* 啟用 Flexbox 排版，讓子元素預設橫向並列 */
+            flex-wrap: wrap;        /* 允許在小螢幕時自動折行，避免元件擠壓變形 */
+            align-items: center;    /* 讓 Logo、文字、按鈕在垂直方向上對齊置中 */
+justify-content: flex-start; /* 關鍵：所有元素靠左緊貼，不平均分配空間 */
+            gap: 1.5rem;
+            padding: 1.5rem;
+            border-radius: 1.5rem;
+            background: linear-gradient(to bottom right, #fde68a, #ffedd5);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+
+        }
+        @media (min-width: 768px) { .hero-banner { padding: 2rem; } }
+        .hero-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            letter-spacing: 0.05rem;
+            color: #451a03;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .hero-desc-wrapper {
+            font-size: 1rem;
+            color: #78350f;
+            line-height: 1.625;
+            letter-spacing: 0.12em;
+            max-width: 48rem;
+            width: 100%;
+            text-align: left;
+        }
+
+        .hero-desc-wrapper p2{
+            font-size: 0.75rem;
+            letter-spacing: 0.1em;
+        }
+        @media (min-width: 768px) { .hero-desc-wrapper { font-size: 0.875rem; } }
+
+        /* ==========================================
+           7. 標籤分頁與資訊看板 (Tabs & Leaderboard)
+           ========================================== */
+        .tabs-row {
+            display: flex;
+            border-bottom: 1px solid #fde68a;
+            font-size: 0.75rem;
+            font-weight: 700;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        @media (min-width: 768px) { .tabs-row { font-size: 0.875rem; } }
+        .tab-btn {
+            padding: 0.625rem 1rem;
+            color: #9ca3af;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.2s;
+        }
+        .tab-btn:hover { color: #4b5563; }
+        .tab-active-orange {
+            color: #ea580c;
+            border-bottom: 2px solid #f97316;
+        }
+        .tab-btn-flex {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        /* 積分排行榜 */
+        .leaderboard-panel {
+            display: grid;
+            grid-template-columns: repeat(1, minmax(0, 1fr));
+            gap: 1rem;
+            background-color: rgba(254, 243, 199, 0.6);
+            padding: 1rem;
+            border-radius: 1rem;
+            border: 1px solid #fde68a;
+        }
+        @media (min-width: 768px) { .leaderboard-panel { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+        
+        .search-box-card {
+            background-color: #ffffff;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            border: 1px solid #fde68a;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        @media (min-width: 768px) { .search-box-card { grid-column: span 1 / span 1; } }
+        
+        .search-title {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #92400e;
+            margin-bottom: 0.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        .search-icon { width: 0.875rem; height: 0.875rem; }
+        .search-hint { font-size: 11px; color: #9ca3af; margin-bottom: 0.75rem; }
+        .search-input {
+            width: 100%;
+            padding: 0.5rem;
+            background-color: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            font-size: 0.75rem;
+        }
+        .search-input:focus { outline: none; border-color: #b45309; }
+        .btn-search {
+            width: 100%;
+            margin-top: 0.5rem;
+            padding: 0.375rem 0;
+            background-color: #b45309;
+            color: #ffffff;
+            font-size: 0.75rem;
+            font-weight: 700;
+            border-radius: 0.5rem;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-search:hover { background-color: #92400e; }
+
+        .leaderboard-list-card {
+            background-color: #ffffff;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            border: 1px solid #fde68a;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+        @media (min-width: 768px) { .leaderboard-list-card { grid-column: span 2 / span 2; } }
+        .leaderboard-title {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #78350f;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        .leaderboard-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+        }
+
+        /* ==========================================
+           8. 卡片網格與元件 (Cards Grid)
+           ========================================== */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(1, minmax(0, 1fr));
+            gap: 1rem;
+        }
+        
+        @media (min-width: 768px) { .card-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+        @media (min-width: 1024px) { .card-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
+        /* ==========================================
+           9. 彈窗模組通用樣式 (Modals)
+           ========================================== */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(4px);
+            z-index: 50;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+        }
+        .modal-content {
+            background-color: #ffffff;
+            width: 100%;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .max-w-sm { max-width: 24rem; }
+        .max-w-md { max-width: 28rem; }
+        .max-h-scroll { max-height: 90vh; overflow-y: auto; }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        .modal-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #1f2937;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .modal-title-emerald { color: #065f46; }
+        .modal-title-icon { width: 1rem; height: 1rem; color: #ea580c; }
+        .btn-modal-close {
+            color: #9ca3af;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-modal-close:hover { color: #4b5563; }
+        .modal-close-icon { width: 1.25rem; height: 1.25rem; }
+
+        /* 表單與輸入框 */
+        .form-spacing {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        .form-spacing-lg {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .form-row-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.75rem;
+        }
+        .input-block-bg {
+            background-color: rgba(254, 243, 199, 0.5);
+            padding: 0.75rem;
+            border-radius: 1rem;
+            border: 1px solid #fde68a;
+        }
+        .input-block-stone {
+            background-color: #f9fafb;
+            padding: 0.75rem;
+            border-radius: 1rem;
+            border: 1px solid #e5e7eb;
+        }
+        .input-block-orange {
+            background-color: #fff7ed;
+            padding: 0.75rem;
+            border-radius: 1rem;
+            border: 1px solid #ffedd5;
+        }
+        .input-label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #6b7280;
+            margin-bottom: 0.25rem;
+        }
+        .input-label-orange { color: #9a3412; }
+        .avatar-preview-circle {
+            width: 3.5rem;
+            height: 3.5rem;
+            border-radius: 50%;
+            background-color: #fff7ed;
+            border: 2px solid #fbe58a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.875rem;
+            cursor: pointer;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+        .avatar-preview-stone {
+            background-color: #ffffff;
+            border-color: #a8a29e;
+        }
+        
+        .input-field {
+            width: 100%;
+            padding: 0.625rem;
+            background-color: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.75rem;
+            font-size: 0.875rem;
+        }
+        .input-field:focus { outline: none; border-color: #ea580c; }
+        .input-field-stone:focus { outline: none; border-color: #1c1917; }
+        .input-field-textarea { resize: none; }
+        
+        .input-password-special {
+            width: 100%;
+            padding: 0.625rem;
+            background-color: #ffffff;
+            border: 1px solid #fed7aa;
+            border-radius: 0.75rem;
+            font-size: 0.75rem;
+        }
+        .input-password-special:focus { outline: none; border-color: #ea580c; }
+
+        /* 彈窗按鈕群組 */
+        .modal-text-desc { font-size: 0.75rem; color: #6b7280; }
+        .modal-list-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            max-height: 12rem;
+            overflow-y: auto;
+            padding: 0.25rem 0;
+        }
+        .modal-footer-actions {
+            padding-top: 0.5rem;
+            border-top: 1px solid #f3f4f6;
+            display: flex;
+            gap: 0.5rem;
+        }
+        .btn-modal-cancel {
+            flex: 1 1 0%;
+            padding: 0.5rem 0;
+            background-color: #f3f4f6;
+            color: #4b5563;
+            font-size: 0.75rem;
+            font-weight: 700;
+            border-radius: 0.75rem;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-modal-confirm-emerald {
+            flex: 1 1 0%;
+            padding: 0.5rem 0;
+            background-color: #059669;
+            color: #ffffff;
+            font-size: 0.75rem;
+            font-weight: 700;
+            border-radius: 0.75rem;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+        .btn-modal-confirm-emerald:hover { background-color: #047857; }
+        
+        .btn-form-submit-orange {
+            width: 100%;
+            padding: 0.625rem 0;
+            background-color: #ea580c;
+            color: #ffffff;
+            font-weight: 700;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: none;
+            cursor: pointer;
+        }
+        .btn-form-submit-orange:hover { background-color: #c2410c; }
+        
+        .btn-form-submit-stone {
+            width: 100%;
+            padding: 0.625rem 0;
+            background-color: #1c1917;
+            color: #ffffff;
+            font-weight: 700;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: none;
+            cursor: pointer;
+        }
+        .btn-form-submit-stone:hover { background-color: #0c0a09; }
+
+/* ==========================================
+   11. 精準對齊圖片規格的卡片樣式
+   ========================================== */
+/* 核心卡片容器：純白背景、精準的柔和圓角與邊框線條 */
+.task-card {
+    background-color: #ffffff;
+    border: 1.5px solid #fffbeb; /* 非常淡的琥珀黃邊框線 */
+    border-radius: 1.5rem;       /* 大圓角，完美貼合圖片外觀 */
+    padding: 1.75rem;            /* 舒適的內距留白 */
+    box-shadow: 0 10px 25px -5px rgba(251, 191, 36, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.02); /* 微妙的溫暖陰影 */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 1.25rem;
+    position: relative;
+    box-sizing: border-box;
+}
+
+/* 頭像與標題橫向排版 */
+.task-card-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+/* 頭像外圈 */
+.avatar-circle-orange {
+    width: 3.25rem;
+    height: 3.25rem;
+    border-radius: 50%;
+    background-color: #fffbeb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+/* 標題與副標題字型配置 */
+.task-card-title {
+    font-size: 1rem;
+    font-weight: 800; /* 加粗字體 */
+    color: #1e293b;   /* 深色優雅字體 */
+    margin: 0;
+    line-height: 1.3;
+}
+.task-card-subtitle {
+    font-size: 0.6rem;
+    color: #94a3b8;   /* 淺灰色字體 */
+    margin-top: 0.25rem;
+}
+
+/* 限制條件標籤 (例如：體力勞動、基礎畫畫能力吧~) */
+.tag-orange {
+    display: inline-block;
+    font-size: 0.6rem;
+    font-weight: 700;
+    color: #c2410c;
+    background-color: #fff7ed;
+    padding: 0.375rem 0.875rem;
+    border-radius: 9999px; /* 全圓角膠囊狀 */
+    margin-top: 0.25rem;
+}
+
+/* 委託詳細說明內文 */
+.task-card-description {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #334155;
+    line-height: 1.6;
+    margin: 0.5rem 0 0.25rem 0;
+    white-space: pre-line;
+}
+
+/* 底部資訊分隔線 */
+.task-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 1rem;
+    border-top: 1px dashed #f1f5f9; /* 細緻的灰虛線 */
+}
+
+/* 報酬與時間文字 */
+.reward-info-text {
+    font-size: 0.7rem;
+    color: #94a3b8;
+    font-weight: 500;
+    flex: 1;
+    padding-right: 0.5rem;
+}
+.reward-highlight {
+    color: #c2410c; /* 溫暖的橘褐色 */
+    font-weight: 700;
+}
+
+/* 右下角「接受委託」按鈕：大圓角、滿版橘色 */
+.btn-card-orange {
+    background-color: #ea580c;
+    color: #ffffff;
+    font-size: 0.8rem;
+    font-weight: 700;
+    padding: 0.625rem 1.25rem;
+    border-radius: 0.875rem; /* 精準對齊圖片中的按鈕圓角 */
+    border: none;
+    cursor: pointer;
+    white-space: nowrap;
+    box-shadow: 0 4px 6px -1px rgba(234, 88, 12, 0.2);
+    transition: background-color 0.2s;
+}
+.btn-card-orange:hover {
+    background-color: #c2410c;
+}
+
+/* 圓滿解決狀態徽章 */
+.badge-status-success {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: #047857;
+    background-color: #ecfdf5;
+    padding: 0.5rem 0.875rem;
+    border-radius: 0.875rem;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+.status-success-subtitle {
+    font-size: 0.75rem;
+    color: #059669;
+    font-weight: 500;
+}
+
+/* 管理端刪除按鈕定位 */
+.card-admin-tools {
+    position: absolute;
+    top: 1.25rem;
+    right: 1.25rem;
+    z-index: 10;
+}
+    </style>
+</head>
+<body>
+
+      <div id="header-container"></div>    
+
+    <div id="toast-message" class="hidden toast-notification">
+        📋 聯絡資訊已複製到您的剪貼簿！
+    </div>
+
+    <div id="admin-navbar" class="hidden admin-nav">
+        <div class="admin-nav-container">
+            <div class="admin-title-row">
+                <div class="admin-title-group">
+                    <i data-lucide="shield" class="admin-title-icon"></i>
+                    <h2 class="admin-main-title">萬事屋全域管理端 (最高權限)</h2>
+                </div>
+                <button onclick="toggleAdminNavbar()" class="btn-admin-close-nav">
+                    <i data-lucide="x" class="admin-close-icon"></i>
+                </button>
+            </div>
+            
+            <div id="admin-logged-out" class="admin-logout-row">
+                <p class="admin-hint-text">
+                    萬事屋主理人專用登入密碼：<code class="admin-password-code">admin123</code>
+                </p>
+                <div class="admin-input-group-wrapper">
+                    <input type="password" id="admin-password-input" placeholder="輸入管理密碼" class="admin-password-input">
+                    <button onclick="handleAdminLogin()" class="btn-admin-login">認證登入</button>
+                </div>
+            </div>
+            
+            <div id="admin-logged-in" class="hidden admin-login-row">
+                <div class="admin-success-badge">
+                    <i data-lucide="check-circle" class="admin-success-icon"></i>
+                    <span class="admin-success-text">主理人模式已啟用：您不受個案密碼限制，可任意刪除/變更狀態。</span>
+                </div>
+                <div class="admin-logout-wrapper">
+                    <button onclick="handleAdminLogout()" class="btn-admin-logout">登出主理人</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <main id="main-content-layout" class="main-layout">
+        <div id="global-admin-badge" class="hidden admin-status-badge">🔑 主理人權限運作中 — 全域管理功能已解鎖</div>
+        
+        <div class="layout-spacing">
+        
+        <div class="hero-banner">
+
+
+            <div onclick="toggleAdminNavbar()" class="banner-logo-group">
+                <img src="/images/logo-small2.png" alt="Logo" class="banner-logo-img" oncontextmenu="return false;" ondragstart="return false;" />
+                
+            </div>
+            <div>
+                <h1 class="hero-title">客舍萬事屋</h1>
+                <span class="hero-title-sub">Slow Pace Skill Supermarker</span>
+            </div>
+            
+            <div class="hero-desc-wrapper">
+                <p>生活中總會遇到各種奇難雜務。受到日本專門幫助人們解決生活難題的「萬事屋」所啟發，我們希望客舍能成為一個技能交換的平台，以「萬事分」作為代幣。需求技能的人也能同時分享自己的專長，讓技能分享成為一種循環的力量。</p>
+                <hr class="border-stone-200 my-4" />
+                <p2>在過去一年的運營中，我們意識到周圍的人擁有無限的潛力。有熱愛畫畫的人、創作歌詞的人、研究歷史和考古的人、攝影的人，甚至從事文字工作的朋友。這些來自不同背景的鄰里人，分享各自的經驗與見解，讓我們得以完整討論和互相啟發。轉念一想，技能分享不只是學術或領域上的專業，很多時候，各人的分享也可以解決彼此生活當中的小難題。</p2>
+            </div>
+        </div>
+
+                    <div class="layout-action-row">
+            <button id="header-skill-btn" onclick="openSkillModal()" class="hidden btn-base btn-stone">+ 新增技能人才</button>
+            <button id="header-upload-btn" onclick="openUploadModal()" class="btn-base btn-orange">+ 發布新委託</button>
+            </div>
+
+            <div class="tabs-row">
+                <button id="tab-active" onclick="switchTab('active')" class="tab-btn tab-active-orange">等待幫助的委託</button>
+                <button id="tab-completed" onclick="switchTab('completed')" class="tab-btn">已完成的委託</button>
+                <button id="tab-skills" onclick="switchTab('skills')" class="tab-btn tab-btn-flex"><span>✨ 鄰里名冊與積分榜</span></button>
+            </div>
+
+            <div id="skills-leaderboard-section" class="hidden leaderboard-panel">
+                <div class="search-box-card">
+                    <div>
+                        <h4 class="search-title">
+                            <i data-lucide="search" class="search-icon"></i>
+                            <span>個人萬事分快速查詢</span>
+                        </h4>
+                        <p class="search-hint">輸入您接單時填寫的聯絡資訊(如IG/Line)</p>
+                        <input type="text" id="search-point-input" placeholder="example" class="search-input">
+                    </div>
+                    <button onclick="queryPersonalPoints()" class="btn-search">查詢我的分數</button>
+                </div>
+                <div class="leaderboard-list-card">
+                    <h4 class="leaderboard-title">🏆 <span>萬事屋榮譽英雄榜 (Top 3)</span></h4>
+                    <div id="leaderboard-target" class="leaderboard-container"></div>
+                </div>
+            </div>
+
+            <div id="posts-container" class="card-grid"></div>
+        </div>
+    </main>
+
+    <main id="single-post-layout" class="hidden single-layout">
+        <div style="margin-bottom: 1rem;">
+            <button onclick="backToHomeList()" class="btn-back">
+                <i data-lucide="arrow-left" class="btn-back-icon"></i>
+                <span>返回看板首頁</span>
+            </button>
+        </div>
+        <div id="single-post-render-target"></div>
+    </main>
+
+    <div id="join-modal" class="hidden modal-overlay">
+        <div class="modal-content max-w-sm">
+            <div class="modal-header">
+                <h3 class="modal-title">
+                    <i data-lucide="shield-alert" class="modal-title-icon"></i>
+                    <span>填寫您的資料</span>
+                </h3>
+                <button onclick="closeJoinModal()" class="btn-modal-close">
+                    <i data-lucide="x" class="modal-close-icon"></i>
+                </button>
+            </div>
+            <form id="join-form" onsubmit="handleJoinSubmit(event)" class="form-spacing">
+                <input type="hidden" id="join-post-id">
+                <div>
+                    <label class="input-label">您的姓名 / 稱呼</label>
+                    <input type="text" id="join-name" required class="input-field">
+                </div>
+                <div>
+                    <label class="input-label">您的聯絡方式</label>
+                    <input type="text" id="join-ig" required class="input-field">
+                </div>
+                <button type="submit" class="btn-form-submit-orange">確認接下此委託</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="complete-modal" class="hidden modal-overlay">
+        <div class="modal-content max-w-sm">
+            <div class="modal-header">
+                <h3 class="modal-title modal-title-emerald">✨ <span>圓滿結案與發放萬事分</span></h3>
+                <button onclick="closeCompleteModal()" class="btn-modal-close">
+                    <i data-lucide="x" class="modal-close-icon"></i>
+                </button>
+            </div>
+            <div class="form-spacing">
+                <p class="modal-text-desc">請選出本次協助您完成委託的鄰里人英雄。</p>
+                <input type="hidden" id="complete-post-id">
+                <div id="heroes-select-container" class="modal-list-container"></div>
+                <div class="modal-footer-actions">
+                    <button onclick="closeCompleteModal()" class="btn-modal-cancel">取消</button>
+                    <button onclick="submitCompleteTask()" class="btn-modal-confirm-emerald">確認結案並送出分數</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="upload-modal" class="hidden modal-overlay">
+        <div class="modal-content max-w-md max-h-scroll no-scrollbar">
+            <div class="modal-header">
+                <h3 class="modal-title">發布新委託</h3>
+                <button onclick="closeUploadModal()" class="btn-modal-close">
+                    <i data-lucide="x" class="modal-close-icon"></i>
+                </button>
+            </div>
+            <form id="post-form" onsubmit="handleFormSubmit(event)" class="form-spacing-lg">
+                <div class="input-block-bg">
+                    <label class="input-label">委託人標誌</label>
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <div onclick="toggleEmojiBank('post')" id="current-avatar-preview" class="avatar-preview-circle">🙋‍♂️</div>
+                    </div>
+                    <input type="hidden" id="selected-emoji" value="🙋‍♂️">
+                </div>
+                <div>
+                    <label class="input-label">委託的事情</label>
+                    <input type="text" id="taskTitleInput" required class="input-field">
+                </div>
+                <div class="form-row-grid">
+                    <div><label class="input-label">您的稱呼</label><input type="text" id="clientNameInput" required class="input-field"></div>
+                    <div><label class="input-label">您的聯絡方式</label><input type="text" id="clientContactInput" required class="input-field"></div>
+                </div>
+                <div class="form-row-grid">
+                    <div><label class="input-label">限制條件</label><input type="text" id="taskTagInput" required class="input-field"></div>
+                    <div><label class="input-label">報酬</label><input type="text" id="rewardInput" required class="input-field"></div>
+                </div>
+                <div>
+                    <label class="input-label">委託的詳細說明</label>
+                    <textarea id="taskDetailsInput" required rows="3" class="input-field input-field-textarea"></textarea>
+                </div>
+                <div class="input-block-orange">
+                    <label class="input-label input-label-orange">設定管理密碼</label>
+                    <input type="password" id="postPasswordInput" required class="input-password-special">
+                </div>
+                <button type="submit" class="btn-form-submit-orange">發佈並上傳至萬事屋</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="skill-modal" class="hidden modal-overlay">
+        <div class="modal-content max-w-md">
+            <div class="modal-header">
+                <h3 class="modal-title">建立鄰里人技能表</h3>
+                <button onclick="closeSkillModal()" class="btn-modal-close">
+                    <i data-lucide="x" class="modal-close-icon"></i>
+                </button>
+            </div>
+            <form id="skill-form" onsubmit="handleSkillSubmit(event)" class="form-spacing-lg">
+                <div class="input-block-stone">
+                    <label class="input-label">鄰里人代表的圖像</label>
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <div onclick="toggleEmojiBank('skill')" id="skill-avatar-preview" class="avatar-preview-circle avatar-preview-stone">🧑‍🎨</div>
+                    </div>
+                    <input type="hidden" id="skill-selected-emoji" value="🧑‍🎨">
+                </div>
+                <div>
+                    <label class="input-label">鄰里人的姓名</label>
+                    <input type="text" id="skillNameInput" required class="input-field input-field-stone">
+                </div>
+                <div class="form-row-grid">
+                    <div><label class="input-label">技能標籤</label><input type="text" id="skillTagInput" required class="input-field input-field-stone"></div>
+                    <div><label class="input-label">聯絡方法</label><input type="text" id="skillContactInput" required class="input-field input-field-stone"></div>
+                </div>
+                <div>
+                    <label class="input-label">個人專長介紹</label>
+                    <textarea id="skillDescInput" required rows="3" class="input-field input-field-stone input-field-textarea"></textarea>
+                </div>
+                <button type="submit" class="btn-form-submit-stone">新增至鄰里人技能名冊</button>
+            </form>
+        </div>
+    </div>
+
+      <footer id="global-footer" class="custom-footer"></footer>
+
+    <script>
+        // Supabase 金鑰與連線初始化資料
+        const supabaseUrl = 'https://blqlrxqckiuvgevmakbu.supabase.co';
+        const supabaseKey = 'sb_publishable_qFXwpuGChVdRwjc9K7prVQ_PgYmlnpG';
+        const TABLE_NAME = 'skills';
+        const POSTS_TABLE = 'posts';
+        
+        const client = supabase.createClient(supabaseUrl, supabaseKey);
+        const defaultPassword = "slow2024"; // 全域管理端固定登入密碼
+        
+        let posts = [];                 // 存放從資料庫撈出來的所有委託案件
+        let skills = [];                // 存放所有鄰里人技能檔案
+        let isAdmin = false;            // 全域管理員登入狀態
+        let currentViewingPostId = null;// 當前正在瀏覽的詳細案件 ID（null 代表在首頁）
+        let currentTab = 'active';      // 當前頁籤狀態：active / completed / skills
+        let unlockedPosts = {};         // 記錄目前瀏覽器中，已被使用者成功輸入個案密碼解鎖的案件
+
+        // 網頁載入完成後的初始化程序
+        window.onload = function() {
+            fetchPostsFromSupabase();
+            fetchSkillsFromSupabase(); 
+            setupRandomDefaultAvatar();
+        };
+
+        // 從 Supabase 撈取委託單資料
+        async function fetchPostsFromSupabase() {
+            try {
+                const { data, error } = await client.from(POSTS_TABLE).select('*').order('created_at', { ascending: false });
+                if (error) throw error;
+                posts = (data || []).map(post => ({ ...post, timeAgo: calculateTimeAgo(post.created_at) }));
+                refreshView();
+            } catch (err) { console.error("讀取委託失敗:", err.message); }
+        }
+
+        // 從 Supabase 撈取鄰里人技能資料
+        async function fetchSkillsFromSupabase() {
+            try {
+                const { data, error } = await client.from(TABLE_NAME).select('*').order('created_at', { ascending: false });
+                if (error) throw error;
+                skills = data || [];
+                refreshView();
+            } catch (err) { console.error("讀取技能名冊失敗:", err.message); }
+        }
+
+        // 依據當前狀態重繪畫面
+        function refreshView() { 
+            if (currentViewingPostId !== null) { renderSinglePostView(currentViewingPostId); } 
+            else { renderPosts(); } 
+        }
+
+        // 計算每位鄰里人獲得的總萬事分
+        function countAllPoints() {
+            const scores = {};
+            posts.forEach(post => {
+                const isComp = post.iscompleted !== undefined ? post.iscompleted : post.isCompleted;
+                if (isComp && post.completed_by_contact) {
+                    const contact = post.completed_by_contact.trim();
+                    if (!scores[contact]) {
+                        scores[contact] = { name: post.completed_by_name || '神祕鄰里人', points: 0 };
+                    }
+                    scores[contact].points += 1;
+                }
+            });
+            return scores;
+        }
+
+        // 快速查詢個人累積點數
+        function queryPersonalPoints() {
+            const input = document.getElementById('search-point-input').value.trim();
+            if(!input) { alert("請輸入聯絡資訊再查詢喔！"); return; }
+            const allScores = countAllPoints();
+            const result = allScores[input];
+            if(result) {
+                alert(`🏮 查詢成功！\n鄰里人：${result.name}\n目前已累積： ${result.points} 點萬事分！\n太棒了，感謝您對客舍的付出！`);
+            } else {
+                alert(`目前查詢不到「${input}」的得點紀錄。快去接單幫忙賺取第一個萬事分吧！`);
+            }
+        }
+
+ // 頁籤切換控制邏輯
+function switchTab(tabName) {
+    currentTab = tabName;
+    
+    ['tab-active', 'tab-completed', 'tab-skills'].forEach(t => {
+        const el = document.getElementById(t);
+        if(el) el.className = "tab-btn";
+    });
+    
+    if(tabName === 'active') document.getElementById('tab-active').className = "tab-btn tab-active-orange";
+    if(tabName === 'completed') document.getElementById('tab-completed').className = "tab-btn tab-active-orange";
+    // 拔除原本的 flex items-center gap-1，改用 CSS 定義好的 .tab-btn-flex
+    if(tabName === 'skills') document.getElementById('tab-skills').className = "tab-btn tab-active-orange tab-btn-flex";
+    
+    const lbSection = document.getElementById('skills-leaderboard-section');
+    if (tabName === 'skills') {
+        lbSection?.classList.remove('hidden');
+        if (isAdmin) {
+            document.getElementById('header-skill-btn')?.classList.remove('hidden');
+            document.getElementById('header-upload-btn')?.classList.add('hidden');
+        }
+    } else {
+        lbSection?.classList.add('hidden');
+        document.getElementById('header-skill-btn')?.classList.add('hidden');
+        document.getElementById('header-upload-btn')?.classList.remove('hidden');
+    }
+    renderPosts();
+}
+
+// 主列表渲染主程式
+function renderPosts() {
+    const container = document.getElementById('posts-container');
+    if(!container) return;
+    container.innerHTML = '';
+
+    const allScores = countAllPoints();
+
+    if (currentTab === 'skills') {
+        const leaderboardTarget = document.getElementById('leaderboard-target');
+        if(leaderboardTarget) {
+            const sortedHeroes = Object.keys(allScores)
+                .map(k => ({ contact: k, ...allScores[k] }))
+                .sort((a,b) => b.points - a.points)
+                .slice(0, 3);
+            
+            if(sortedHeroes.length === 0) {
+                // 去格式化：改為自訂的榜單空狀態文字樣式 class
+                leaderboardTarget.innerHTML = `<p class="leaderboard-empty-text">尚無得點紀錄，等待第一位英雄誕生！</p>`;
+            } else {
+                const medals = ['🥇', '🥈', '🥉'];
+                // 去格式化：改用 .leaderboard-item 區塊，內含排行文字與積分
+                leaderboardTarget.innerHTML = sortedHeroes.map((h, i) => `
+                    <div class="leaderboard-item">
+                        <span class="leaderboard-item-info">${medals[i]} <strong>${h.name}</strong> (${h.contact})</span>
+                        <span class="leaderboard-item-points">🪙 ${h.points} 分</span>
+                    </div>
+                `).join('');
+            }
+        }
+
+        if (skills.length === 0) {
+            // 去格式化：使用自訂無資料提示樣式
+            container.innerHTML = '<p class="container-empty-hint">目前尚無登記鄰里人技能。</p>';
+            return;
+        }
+        
+        skills.forEach(skill => {
+            const card = document.createElement('div');
+            // 去格式化：將鄰里人技能同樣包裝成「白色卡片樣式」
+            card.className = "task-card";
+            const adminTools = isAdmin ? `
+                <div class="card-admin-tools">
+                    <button onclick="deleteSkill('${skill.id}')" class="btn-card-delete">🗑️</button>
+                </div>` : '';
+            
+            const myPoint = allScores[skill.contact?.trim()]?.points || 0;
+
+            card.innerHTML = `
+                <div>
+                    <div class="task-card-header">
+                        <div class="avatar-circle-stone">${skill.emoji || '🧑‍🎨'}</div>
+                        <div>
+                            <div class="title-with-badge">
+                                <h3 class="task-card-title">${skill.name}</h3>
+                                <span class="point-badge">🪙 萬事分: ${myPoint}</span>
+                            </div>
+                            <span class="tag-stone">${skill.skilltag || ''}</span>
+                        </div>
+                    </div>
+                    ${adminTools}
+                    <p class="task-card-description">${skill.description}</p>
+                </div>
+                <div class="task-card-footer">
+                    <span class="contact-info-text">管道: <strong>${skill.contact}</strong></span>
+                    <button onclick="copyContactInfo('${skill.contact}')" class="btn-card-copy">📋 複製資料</button>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+        return;
+    }
+
+    const isCompletedTarget = (currentTab === 'completed');
+    const filteredPosts = posts.filter(post => {
+        const compVal = post.iscompleted !== undefined ? post.iscompleted : post.isCompleted;
+        return !!compVal === isCompletedTarget;
+    });
+    
+    if (filteredPosts.length === 0) {
+        // 去格式化：使用自訂無資料提示樣式
+        container.innerHTML = '<p class="container-empty-hint">此分類目前沒有委託案件。</p>';
+        return;
+    }
+
+    filteredPosts.forEach(post => {
+        const hList = post.heroeslist || [];
+        const count = hList.length;
+        const card = document.createElement('div');
+        
+        const cEmoji = post.clientemoji || '🙋‍♂️';
+        const tTitle = post.tasktitle || '';
+        const cName = post.clientname || '';
+        const tTag = post.tasktag || '';
+        const tDetails = post.taskdetails || '';
+        const rwd = post.reward || '';
+        const isComp = post.iscompleted !== undefined ? post.iscompleted : post.isCompleted;
+
+        // 【核心修改】：全面換成自訂的白色卡片樣式 Class
+        card.className = "task-card clickable-group";
+        card.onclick = (e) => { if (!e.target.closest('button')) { goToPostDetail(post.id); } };
+
+        let adminActionHtml = '';
+        if (isAdmin) {
+            // 去格式化：移除 bg-red-50 text-red-600 等 Tailwind
+            adminActionHtml += `<button onclick="deletePost('${post.id}')" class="btn-card-delete">🗑️</button>`;
+        }
+
+        card.innerHTML = `
+            <div>
+                <div class="task-card-header">
+                    <div class="avatar-circle-orange">${cEmoji}</div>
+                    <div style="flex: 1; min-width: 0;">
+                        <h3 class="task-card-title text-ellipsis-2line">${tTitle}</h3>
+                        <p class="task-card-subtitle">委託人：${cName} • ${count}人已接單</p>
+                    </div>
+                </div>
+                <div class="card-admin-tools">${adminActionHtml}</div>
+                <div style="margin-bottom: 0.5rem;">
+                    <span class="tag-orange">${tTag}</span>
+                </div>
+                <p class="task-card-description text-ellipsis-3line">${tDetails}</p>
+            </div>
+            <div class="task-card-footer">
+                <div class="reward-info-text">
+                    <span class="reward-highlight">💰 報酬：${rwd}</span> • <span>${post.timeAgo}</span>
+                </div>
+                ${isComp 
+                    ? `<span class="badge-status-success">
+                        <span class="status-success-title">圓滿解決 🏮</span>
+                        <span class="status-success-subtitle">貢獻者: ${post.completed_by_name || '無'}</span>
+                       </span>`
+                    : `<button onclick="openJoinModal('${post.id}')" class="btn-base btn-orange">接受委託</button>`
+                }
+            </div>
+        `;
+        container.appendChild(card);
+    });
+    setTimeout(() => { lucide.createIcons(); }, 100);
+}
+
+        // 導向至單一案件詳細內頁
+        function goToPostDetail(postId) {
+            currentViewingPostId = postId;
+            document.getElementById('main-content-layout').classList.add('hidden');
+            document.getElementById('header-upload-btn')?.classList.add('hidden');
+            document.getElementById('header-skill-btn')?.classList.add('hidden');
+            document.getElementById('single-post-layout').classList.remove('hidden');
+            renderSinglePostView(postId);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // 返回看板主頁列表
+        function backToHomeList() {
+            currentViewingPostId = null;
+            document.getElementById('single-post-layout').classList.add('hidden');
+            document.getElementById('main-content-layout').classList.remove('hidden');
+            switchTab(currentTab); 
+        }
+
+        // 驗證個案自訂的管理密碼
+        function verifyPostPasswordInline(postId) {
+            const post = posts.find(p => String(p.id) === String(postId));
+            if(!post) return;
+            const inputVal = document.getElementById('inline-pwd-input').value.trim();
+            
+            if(inputVal === post.password || isAdmin) {
+                unlockedPosts[postId] = true;
+                renderSinglePostView(postId);
+            } else {
+                alert("❌ 密碼錯誤！無法解鎖管理區塊。");
+            }
+        }
+
+        // 詳細內頁視圖渲染程式
+        function renderSinglePostView(postId) {
+            const post = posts.find(p => String(p.id) === String(postId));
+            const targetDiv = document.getElementById('single-post-render-target');
+            if (!post || !targetDiv) return;
+
+            const hList = post.heroeslist || [];
+            const isComp = post.iscompleted !== undefined ? post.iscompleted : post.isCompleted;
+            const bgClor = post.cardbgcolor || 'bg-amber-50';
+            const tTitle = post.tasktitle || '';
+            const cName = post.clientname || '';
+            const tTag = post.tasktag || '';
+            const tDetails = post.taskdetails || '';
+            const rwd = post.reward || '';
+            const cContact = post.clientcontact || '無資料';
+
+            const hasAccess = isAdmin || unlockedPosts[postId] || !post.password;
+
+            let actionButtonsHtml = '';
+            let managementSectionHtml = '';
+
+            if (isComp) {
+                actionButtonsHtml = `<span class="text-sm font-bold text-emerald-600 bg-emerald-50 px-4 py-2 rounded-xl">已由 ${post.completed_by_name || '鄰里英雄'} 完成 🏮</span>`;
+            } else {
+                actionButtonsHtml = `
+                    <div class="flex gap-2">
+                        ${hasAccess ? `<button onclick="openCompleteModal('${post.id}')" class="bg-emerald-600 text-white font-bold px-4 py-2.5 rounded-xl text-xs hover:bg-emerald-700 shadow-sm">✔️ 結案給分</button>` : ''}
+                        <button onclick="openJoinModal('${post.id}')" class="bg-orange-600 text-white font-bold px-4 py-2.5 rounded-xl text-xs hover:bg-orange-700 shadow-sm">我要接單</button>
+                    </div>
+                `;
+            }
+
+            if (hasAccess) {
+                let participantsListHtml = hList.length === 0 
+                    ? `<p class="text-xs text-gray-400 py-4 col-span-2 text-center">目前尚無接單人，快來成為第一個吧！</p>`
+                    : hList.map(person => `
+                        <div class="flex justify-between items-center bg-gray-50 p-2.5 rounded-xl border border-gray-100">
+                            <span class="font-bold text-gray-700 text-xs">🥷 接單人：${person.name}</span>
+                            <button onclick="copyContactInfo('${person.contact}')" class="text-[11px] text-orange-600 bg-orange-50 px-2.5 py-1 rounded-lg border border-orange-100 font-bold">📋 複製資料</button>
+                        </div>
+                    `).join('');
+
+                managementSectionHtml = `
+                    <div class="pt-6 border-t border-gray-100 space-y-3">
+                        <h3 class="text-xs font-bold text-emerald-800 tracking-widest uppercase flex items-center gap-1.5">
+                            <i data-lucide="unlock" class="w-3.5 h-3.5"></i><span>已接下委託的鄰里人名冊 (${hList.length})</span>
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2">${participantsListHtml}</div>
+                    </div>
+                `;
+            } else {
+                managementSectionHtml = `
+                    <div class="pt-6 border-t border-gray-100 bg-stone-50/50 p-4 rounded-2xl border border-dashed border-stone-200 mt-4 text-center">
+                        <div class="flex flex-col items-center justify-center space-y-2">
+                            <i data-lucide="lock" class="w-6 h-6 text-stone-400"></i>
+                            <h4 class="text-xs font-bold text-stone-700">鄰里人名冊與結案功能已加密</h4>
+                            <p class="text-[11px] text-gray-400 max-w-sm">為了保護接單人的聯絡隱私，請輸入發布此案件時設定的「管理密碼」解鎖查看名冊與進行結案給分。</p>
+                            <div class="flex gap-2 max-w-xs w-full mt-2">
+                                <input type="password" id="inline-pwd-input" placeholder="輸入此案件管理密碼" class="w-full px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs tracking-wider focus:outline-none focus:border-orange-500">
+                                <button onclick="verifyPostPasswordInline('${post.id}')" class="px-4 py-1.5 bg-stone-800 text-white font-bold text-xs rounded-lg whitespace-nowrap hover:bg-stone-900">解鎖</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            targetDiv.innerHTML = `
+                <div class="bg-white rounded-3xl p-6 md:p-10 shadow-sm border border-amber-100 w-full space-y-6">
+                    <div class="flex items-center justify-between pb-4 border-b border-gray-100">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-14 h-14 rounded-full ${bgClor} flex items-center justify-center text-3xl shadow-inner">${post.clientemoji || '🙋‍♂️'}</div>
+                            <div>
+                                <h1 class="text-2xl font-bold text-gray-900">${tTitle}</h1>
+                                <p class="text-sm text-gray-500 mt-1">發起委託：<span class="font-semibold text-gray-700">${cName}</span></p>
+                            </div>
+                        </div>
+                        <span class="text-xs px-3 py-1.5 rounded-full bg-orange-50 text-orange-700 font-bold">${tTag}</span>
+                    </div>
+                    <div class="space-y-2">
+                        <h3 class="text-xs font-bold text-gray-400 tracking-widest uppercase">委託細節說明</h3>
+                        <p class="text-base text-gray-700 leading-relaxed tracking-wide whitespace-pre-line">${tDetails}</p>
+                    </div>
+                    <div class="bg-amber-50/30 rounded-2xl p-4 grid grid-cols-2 gap-4 text-sm border border-amber-100">
+                        <div><span class="block text-xs text-gray-400 mb-0.5">💰 額外謝禮 </span><span class="font-bold text-amber-800">${rwd}</span></div>
+                        <div>
+                            <span class="block text-xs text-gray-400 mb-0.5">聯絡方法</span>
+                            <span onclick="copyContactInfo('${cContact}')" class="font-bold text-orange-600 cursor-pointer underline flex items-center gap-1">
+                                <span>${cContact}</span>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="pt-2 flex items-center justify-between">
+                        <div class="text-sm text-gray-600 flex items-center space-x-1"><i data-lucide="users" class="w-4 h-4 text-orange-600"></i><span>已有 <strong class="text-gray-900 font-bold text-base">${hList.length}</strong> 位鄰里人挺身而出</span></div>
+                        ${actionButtonsHtml}
+                    </div>
+                    ${managementSectionHtml}
+                </div>
+            `;
+            setTimeout(() => { lucide.createIcons(); }, 100);
+        }
+
+        // 開啟結案彈窗程序
+        function openCompleteModal(postId) {
+            const post = posts.find(p => String(p.id) === String(postId));
+            if(!post) return;
+
+            document.getElementById('complete-post-id').value = postId;
+            const container = document.getElementById('heroes-select-container');
+            container.innerHTML = '';
+
+            const hList = post.heroeslist || [];
+            
+            const noOneDiv = document.createElement('label');
+            noOneDiv.className = "flex items-center space-x-3 bg-gray-50 p-3 rounded-xl border border-gray-200 cursor-pointer block hover:bg-gray-100";
+            noOneDiv.innerHTML = `
+                <input type="radio" name="selected-complete-hero" value="none" checked class="text-emerald-600 focus:ring-emerald-500">
+                <div>
+                    <p class="text-xs font-bold text-gray-700">❌ 沒有人完成 / 取消此委託</p>
+                    <p class="text-[10px] text-gray-400">（本案會封存，但不會發放萬事分）</p>
+                </div>
+            `;
+            container.appendChild(noOneDiv);
+
+            hList.forEach((hero, index) => {
+                const item = document.createElement('label');
+                item.className = "flex items-center space-x-3 bg-emerald-50/40 p-3 rounded-xl border border-emerald-100 cursor-pointer block hover:bg-emerald-50";
+                item.innerHTML = `
+                    <input type="radio" name="selected-complete-hero" value="${index}" class="text-emerald-600 focus:ring-emerald-500">
+                    <div>
+                        <p class="text-xs font-bold text-emerald-950">🥷 英雄：${hero.name}</p>
+                        <p class="text-[10px] text-emerald-700/70">聯絡管道：${hero.contact}</p>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+
+            document.getElementById('complete-modal').classList.remove('hidden');
+        }
+
+        function closeCompleteModal() { document.getElementById('complete-modal').classList.add('hidden'); }
+
+        // 確認送出結案與發放萬事分
+        async function submitCompleteTask() {
+            const postId = document.getElementById('complete-post-id').value;
+            const post = posts.find(p => String(p.id) === String(postId));
+            if(!post) return;
+
+            const selectedRadio = document.querySelector('input[name="selected-complete-hero"]:checked');
+            if(!selectedRadio) { alert("請選擇一項結案條件。"); return; }
+
+            let cName = null;
+            let cContact = null;
+
+            if(selectedRadio.value !== 'none') {
+                const heroIndex = parseInt(selectedRadio.value);
+                const chosenHero = post.heroeslist[heroIndex];
+                cName = chosenHero.name;
+                cContact = chosenHero.contact;
+            }
+
+            try {
+                const { error } = await client
+                    .from(POSTS_TABLE)
+                    .update({ 
+                        iscompleted: true,
+                        completed_by_name: cName,
+                        completed_by_contact: cContact
+                    })
+                    .eq('id', postId);
+                
+                if (error) throw error;
+                
+                closeCompleteModal();
+                if(currentViewingPostId === postId) backToHomeList();
+                await fetchPostsFromSupabase();
+                
+                if(cName) {
+                    alert(`🏮 結案成功！恭喜【${cName}】獲得了 1 點萬事分！`);
+                } else {
+                    alert("🏮 委託已關閉結案。");
+                }
+            } catch (err) { alert("更新結案狀態失敗: " + err.message); }
+        }
+
+        // 接單表單處理
+        async function handleJoinSubmit(event) {
+            event.preventDefault();
+            const postId = document.getElementById('join-post-id').value;
+            const newHero = {
+                name: document.getElementById('join-name').value.trim(),
+                contact: document.getElementById('join-ig').value.trim()
+            };
+
+            const post = posts.find(p => String(p.id) === String(postId));
+            if (!post) return;
+
+            const updatedHeroes = [...(post.heroeslist || []), newHero];
+
+            try {
+                const { error } = await client.from(POSTS_TABLE).update({ heroeslist: updatedHeroes }).eq('id', postId);
+                if (error) throw error;
+                closeJoinModal();
+                await fetchPostsFromSupabase();
+                alert("🎉 恭喜！您已成功接單，請等候發布者與您聯繫。");
+            } catch (err) { alert("接受委託失敗: " + err.message); }
+        }
+
+        // 新增發布委託表單處理
+        async function handleFormSubmit(event) {
+            event.preventDefault();
+            const bgColors = ['bg-amber-50', 'bg-orange-50', 'bg-yellow-50', 'bg-stone-100'];
+            const newPost = {
+                tasktitle: document.getElementById('taskTitleInput').value.trim(), 
+                clientname: document.getElementById('clientNameInput').value,
+                clientcontact: document.getElementById('clientContactInput').value,
+                tasktag: document.getElementById('taskTagInput').value,
+                taskdetails: document.getElementById('taskDetailsInput').value,
+                reward: document.getElementById('rewardInput').value,
+                clientemoji: document.getElementById('selected-emoji').value,
+                cardbgcolor: bgColors[Math.floor(Math.random() * bgColors.length)],
+                iscompleted: false,
+                heroeslist: [],
+                password: document.getElementById('postPasswordInput').value.trim()
+            };
+
+            try {
+                const { error } = await client.from(POSTS_TABLE).insert([newPost]);
+                if (error) throw error;
+                closeUploadModal();
+                setupRandomDefaultAvatar();
+                await fetchPostsFromSupabase();
+                alert("✨ 委託發布成功！請記好您的管理密碼，以便日後回來查看名冊或結案！");
+            } catch (err) { alert("發布新委託失敗: " + err.message); }
+        }
+
+        // 新增鄰里人技能表單處理
+        async function handleSkillSubmit(event) {
+            event.preventDefault();
+            const data = {
+                name: document.getElementById('skillNameInput').value,
+                skilltag: document.getElementById('skillTagInput').value,
+                contact: document.getElementById('skillContactInput').value.trim(),
+                description: document.getElementById('skillDescInput').value,
+                emoji: document.getElementById('skill-selected-emoji').value
+            };
+
+            try {
+                const { error } = await client.from(TABLE_NAME).insert([data]);
+                if (error) throw error;
+                closeSkillModal();
+                await fetchSkillsFromSupabase();
+            } catch (err) { alert("儲存技能失敗: " + err.message); }
+        }
+
+        // 複製聯絡資訊
+        function copyContactInfo(text) {
+            if(!text) return;
+            let cleanText = text.trim();
+            const textArea = document.createElement("textarea");
+            textArea.value = cleanText;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            showToast(`📋 已成功複製聯絡資訊：「${cleanText}」`);
+            document.body.removeChild(textArea);
+        }
+
+        // 自訂 Toast 氣泡提示
+        function showToast(message) {
+            const toast = document.getElementById('toast-message');
+            if(!toast) return;
+            toast.innerText = message;
+            toast.classList.remove('hidden');
+            toast.classList.add('toast-popup');
+            setTimeout(() => { toast.classList.add('hidden'); toast.classList.remove('toast-popup'); }, 2300);
+        }
+
+        // 永久刪除委託單
+        async function deletePost(postId) { 
+            if (confirm("確定要從資料庫中永久刪除此委託嗎？")) { 
+                try {
+                    const { error } = await client.from(POSTS_TABLE).delete().eq('id', postId);
+                    if (error) throw error;
+                    if (currentViewingPostId === postId) backToHomeList();
+                    await fetchPostsFromSupabase();
+                } catch (err) { alert("刪除委託失敗: " + err.message); }
+            } 
+        }
+
+        // 移除鄰里人檔案
+        async function deleteSkill(skillId) { 
+            if (confirm("確定要移除此鄰里人技能檔案嗎？")) { 
+                try {
+                    const { error } = await client.from(TABLE_NAME).delete().eq('id', skillId);
+                    if (error) throw error;
+                    await fetchSkillsFromSupabase();
+                } catch (err) { alert("移除技能失敗: " + err.message); }
+            } 
+        }
+
+        // Emoji 選擇庫切換
+        function toggleEmojiBank(mode) { document.getElementById(mode === 'post' ? 'emoji-bank-post' : 'emoji-bank-skill').classList.toggle('hidden'); }
+        function selectEmoji(emoji, mode, element) {
+            if (mode === 'post') {
+                document.getElementById('selected-emoji').value = emoji;
+                document.getElementById('current-avatar-preview').innerText = emoji;
+            } else {
+                document.getElementById('skill-selected-emoji').value = emoji;
+                document.getElementById('skill-avatar-preview').innerText = emoji;
+            }
+            toggleEmojiBank(mode);
+        }
+        // 生成隨機預設頭像
+        function setupRandomDefaultAvatar() {
+            const initialEmojis = ['🙋‍♂️', '🙋‍♀️', '🧑‍💻', '👩‍🎨', '🐱', '🦊'];
+            const randomEmoji = initialEmojis[Math.floor(Math.random() * initialEmojis.length)];
+            if(document.getElementById('selected-emoji')) document.getElementById('selected-emoji').value = randomEmoji;
+            if(document.getElementById('current-avatar-preview')) document.getElementById('current-avatar-preview').innerText = randomEmoji;
+        }
+        
+        // 主理人全域管理面板開關與認證
+        function toggleAdminNavbar() { document.getElementById('admin-navbar')?.classList.toggle('hidden'); }
+        function handleAdminLogin() { 
+            const inputPwd = document.getElementById('admin-password-input').value; 
+            if (inputPwd === defaultPassword) { isAdmin = true; updateAdminUI(); switchTab(currentTab); document.getElementById('admin-password-input').value = ''; } else { alert("認證密碼錯誤！"); } 
+        }
+        function handleAdminLogout() { isAdmin = false; updateAdminUI(); switchTab(currentTab); }
+        function updateAdminUI() {
+            const loggedOut = document.getElementById('admin-logged-out');
+            const loggedIn = document.getElementById('admin-logged-in');
+            const globalBadge = document.getElementById('global-admin-badge');
+            if (isAdmin) { loggedOut?.classList.add('hidden'); loggedIn?.classList.remove('hidden'); globalBadge?.classList.remove('hidden'); } 
+            else { loggedOut?.classList.remove('hidden'); loggedIn?.classList.add('hidden'); globalBadge?.classList.add('hidden'); }
+        }
+        
+        // 彈窗模組開啟/關閉控制
+        function openJoinModal(postId) { document.getElementById('join-post-id').value = postId; document.getElementById('join-modal').classList.remove('hidden'); }
+        function closeJoinModal() { document.getElementById('join-modal').classList.add('hidden'); document.getElementById('join-form').reset(); }
+        function openUploadModal() { document.getElementById('upload-modal').classList.remove('hidden'); }
+        function closeUploadModal() { document.getElementById('post-form').reset(); document.getElementById('upload-modal').classList.add('hidden'); }
+        function openSkillModal() { document.getElementById('skill-modal').classList.remove('hidden'); }
+        function closeSkillModal() { document.getElementById('skill-form').reset(); document.getElementById('skill-modal').classList.add('hidden'); }
+
+        // 時間轉換
+        function calculateTimeAgo(timestamp) {
+            if (!timestamp) return "剛剛";
+            const diffMs = new Date() - new Date(timestamp);
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMins / 60);
+            const diffDays = Math.floor(diffHours / 24);
+            if (diffMins < 1) return "剛剛";
+            if (diffMins < 60) return `${diffMins} 分鐘前`;
+            if (diffHours < 24) return `${diffHours} 小時前`;
+            return `${diffDays} 天前`;
+        }
+
+        // ==========================================
+// 載入頁首並處理年份（維持原樣）
+// ==========================================  
+fetch('/header.html')
+    .then(response => response.text())
+    .then(data => {
+        const container = document.getElementById('header-container');
+        if (container) {
+            container.innerHTML = data;
+            setupHeaderMenu(); // 🛠️ 載入完成後，啟動選單核心與自動收納功能
+        }
+    })
+    .catch(err => console.error("頁首載入失敗:", err));
+
+    // ==========================================================================
+    // 【7. Header 智慧導覽選單演算法】
+    // ==========================================================================
+    function setupHeaderMenu() {
+        const toggleButton = document.querySelector('.menu-toggle');
+        const navLinks = document.querySelector('.header-nav-links');
+
+        if (toggleButton && navLinks) {
+            toggleButton.onclick = function(e) {
+                navLinks.classList.toggle('active');
+                e.stopPropagation();
+            };
+
+            document.onclick = function(e) {
+                if (navLinks.classList.contains('active') && !navLinks.contains(e.target) && e.target !== toggleButton) {
+                    navLinks.classList.remove('active');
+                }
+            };
+        }
+
+        const mainNav = document.querySelector('.header-nav-links'); 
+        if (!mainNav) return;
+
+        let moreMenu = document.getElementById('more-menu');
+        let overflowLinks = document.getElementById('overflow-links');
+        
+        if (!moreMenu) {
+            moreMenu = document.createElement('div');
+            moreMenu.id = 'more-menu';
+            moreMenu.className = 'more-dropdown';
+            moreMenu.innerHTML = `
+                <a href="#" class="more-toggle" onclick="return false;">更多 ▾</a>
+                <div class="more-dropdown-content" id="overflow-links"></div>
+            `;
+            mainNav.appendChild(moreMenu);
+            overflowLinks = document.getElementById('overflow-links');
+        }
+
+        const allLinks = Array.from(mainNav.children).filter(el => el !== moreMenu && el.tagName === 'A');
+        const searchBtn = mainNav.querySelector('.search-icon-btn');
+
+        function adjustNavItems() {
+            if (window.innerWidth <= 768) {
+                allLinks.forEach(item => mainNav.insertBefore(item, moreMenu));
+                if (searchBtn) mainNav.appendChild(searchBtn);
+                moreMenu.style.display = 'none';
+                return;
+            }
+
+            moreMenu.style.display = 'none'; 
+            overflowLinks.innerHTML = '';    
+            allLinks.forEach(item => mainNav.insertBefore(item, moreMenu));
+            if (searchBtn) mainNav.appendChild(searchBtn);
+
+            let navContainerWidth = mainNav.offsetWidth;
+            let totalWidth = 0;
+            let isOverflow = false;
+            
+            const moreBtnWidth = 90; 
+            const searchBtnWidth = searchBtn ? (searchBtn.offsetWidth || 50) : 50;
+
+            for (let i = 0; i < allLinks.length; i++) {
+                const item = allLinks[i];
+                if (isOverflow) {
+                    overflowLinks.appendChild(item);
+                    continue;
+                }
+
+                const itemStyle = window.getComputedStyle(item);
+                const marginLeft = parseFloat(itemStyle.marginLeft) || 0;
+                const marginRight = parseFloat(itemStyle.marginRight) || 0;
+                totalWidth += item.offsetWidth + marginLeft + marginRight;
+
+                if (totalWidth + moreBtnWidth + searchBtnWidth > navContainerWidth) {
+                    isOverflow = true;
+                    moreMenu.style.display = 'inline-block';
+                    overflowLinks.appendChild(item);
+                }
+            }
+        }
+
+        adjustNavItems();
+        window.removeEventListener('resize', adjustNavItems);
+        window.addEventListener('resize', adjustNavItems);
+    }
+
+// ==========================================
+// 載入頁尾並處理年份（維持原樣）
+// ==========================================
+    fetch('/footer.html')
+    .then(response => response.text())
+    .then(data => {
+        const footerContainer = document.getElementById('global-footer');
+        if (footerContainer) {
+            footerContainer.innerHTML = data;
+            
+            // 頁尾載入完成後，更新年份
+            const yearSpan = document.getElementById('current-year');
+            if (yearSpan) {
+                yearSpan.textContent = new Date().getFullYear();
+            }
+        }
+    })
+    .catch(err => console.error("頁尾載入失敗:", err));
+    </script>
+</body>
+</html>

@@ -1,8 +1,3 @@
----
-// 匯入 Layout
-import BaseLayout from '../layouts/BaseLayout.astro';
----
-
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -238,6 +233,15 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             object-fit: cover;
             transition: opacity 0.2s;
         }
+
+        /* 當螢幕寬度小於 768px（一般手機尺寸）時，自動變成 30px */
+        @media (max-width: 768px) {
+            .banner-logo-img {
+                width: 40px;
+                height: 40px;
+            }
+        }
+
         .banner-logo-group:hover .banner-logo-img { opacity: 0.8; }
         .banner-title-main {
             font-size: 0.875rem;
@@ -325,6 +329,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         }
         @media (min-width: 768px) {
             .main-layout { padding-left: 1.5rem; padding-right: 1.5rem; }
+
+        }
         }
         .single-layout {
             width: 100%;
@@ -365,7 +371,8 @@ justify-content: flex-start; /* 關鍵：所有元素靠左緊貼，不平均分
             box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 
         }
-        @media (min-width: 768px) { .hero-banner { padding: 2rem; } }
+        @media (min-width: 768px) { .hero-banner { padding: 1rem; } }
+        
         .hero-title {
             font-size: 1.5rem;
             font-weight: 700;
@@ -615,8 +622,8 @@ justify-content: flex-start; /* 關鍵：所有元素靠左緊貼，不平均分
         }
         .input-label-orange { color: #9a3412; }
         .avatar-preview-circle {
-            width: 3.5rem;
-            height: 3.5rem;
+            width: 2.5rem;
+            height: 2.5rem;
             border-radius: 50%;
             background-color: #fff7ed;
             border: 2px solid #fbe58a;
@@ -744,6 +751,16 @@ justify-content: flex-start; /* 關鍵：所有元素靠左緊貼，不平均分
     display: flex;
     align-items: center;
     gap: 1rem;
+    width: 100%; /* 確保標頭容器佔滿寬度 */
+}
+
+/* 技能名冊排版 */
+.title-with-badge {
+    display: flex;
+     gap: 1.5rem;
+    align-items: center;            /* 垂直置中 */
+    flex: 1;                        /* 關鍵：讓此區塊自動填滿右側剩餘寬度 */
+    font-size: 0.75rem;             /* 設定字級大小 */
 }
 
 /* 頭像外圈 */
@@ -797,10 +814,11 @@ justify-content: flex-start; /* 關鍵：所有元素靠左緊貼，不平均分
 
 /* 底部資訊分隔線 */
 .task-card-footer {
+    font-size: 0.7rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-top: 1rem;
+    padding-top: 0.7rem;
     border-top: 1px dashed #f1f5f9; /* 細緻的灰虛線 */
 }
 
@@ -860,6 +878,32 @@ justify-content: flex-start; /* 關鍵：所有元素靠左緊貼，不平均分
     right: 1.25rem;
     z-index: 10;
 }
+
+/* 讓所有 input 和 textarea 的 placeholder 字體縮小並變淡 */
+input::placeholder,
+textarea::placeholder {
+    font-size: 0.75rem; /* 可以改為 12px 或 13px */
+    color: #99ca9a;     /* 你也可以順便調整提示文字的顏色 */
+}
+
+/* 限制最多顯示 2 行（標題用） */
+.text-ellipsis-2line {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* 限制最多顯示 5 行（內文用，讓列表不用全部展開） */
+.text-ellipsis-5line {
+    display: -webkit-box;
+    -webkit-line-clamp: 5;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
     </style>
 </head>
 <body>
@@ -884,7 +928,7 @@ justify-content: flex-start; /* 關鍵：所有元素靠左緊貼，不平均分
             
             <div id="admin-logged-out" class="admin-logout-row">
                 <p class="admin-hint-text">
-                    萬事屋主理人專用登入密碼：<code class="admin-password-code">admin123</code>
+                    萬事屋主理人專用登入密碼：<code class="admin-password-code"></code>
                 </p>
                 <div class="admin-input-group-wrapper">
                     <input type="password" id="admin-password-input" placeholder="輸入管理密碼" class="admin-password-input">
@@ -897,6 +941,17 @@ justify-content: flex-start; /* 關鍵：所有元素靠左緊貼，不平均分
                     <i data-lucide="check-circle" class="admin-success-icon"></i>
                     <span class="admin-success-text">主理人模式已啟用：您不受個案密碼限制，可任意刪除/變更狀態。</span>
                 </div>
+                <!-- 🌟 把手動調整萬事分的區塊加在這裡！(並把原本的 class="hidden" 拿掉，讓它隨著登入成功自動顯示) -->
+                <div id="admin-points-control" style="margin-top: 15px; padding: 12px; background: #fff3ed; border-radius: 12px; border: 1px solid #ffd8c2;">
+                    <h4 style="font-size: 0.9rem; font-weight: bold; color: #c2410c; margin-bottom: 8px;">⚙️ 管理員手動調整萬事分</h4>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <input type="text" id="admin-target-contact" placeholder="目標聯絡方式 (IG/電話)" class="input-field" style="flex: 1; min-width: 150px; font-size: 0.85rem;">
+                        <input type="text" id="admin-target-name" placeholder="稱呼 (加分用)" class="input-field" style="width: 100px; font-size: 0.85rem;">
+                        <button onclick="adminAdjustPoints(1)" class="btn-base btn-orange" style="padding: 4px 12px; font-size: 0.85rem;">+1 分</button>
+                        <button onclick="adminAdjustPoints(-1)" style="padding: 4px 12px; font-size: 0.85rem; background: #ef4444; color: white; border-radius: 8px; border: none; cursor: pointer;">-1 分</button>
+                    </div>
+                </div>
+
                 <div class="admin-logout-wrapper">
                     <button onclick="handleAdminLogout()" class="btn-admin-logout">登出主理人</button>
                 </div>
@@ -928,18 +983,21 @@ justify-content: flex-start; /* 關鍵：所有元素靠左緊貼，不平均分
             </div>
         </div>
 
-                    <div class="layout-action-row">
-            <button id="header-skill-btn" onclick="openSkillModal()" class="hidden btn-base btn-stone">+ 新增技能人才</button>
+            <div class="layout-action-row">
+            <button onclick="window.open('https://studioslowpace.com/chatroom.html', '_blank')" class="btn-base btn-blue" style="background-color: #55a9d3; color: #ffffff; border: none;">鄰里人交流區 💬</button>
+            <button id="header-skill-btn" onclick="openSkillModal()" class="hidden btn-base btn-stone">+ 新增鄰里人技能</button>
             <button id="header-upload-btn" onclick="openUploadModal()" class="btn-base btn-orange">+ 發布新委託</button>
             </div>
 
             <div class="tabs-row">
                 <button id="tab-active" onclick="switchTab('active')" class="tab-btn tab-active-orange">等待幫助的委託</button>
                 <button id="tab-completed" onclick="switchTab('completed')" class="tab-btn">已完成的委託</button>
-                <button id="tab-skills" onclick="switchTab('skills')" class="tab-btn tab-btn-flex"><span>✨ 鄰里名冊與積分榜</span></button>
+                <button id="tab-skills" onclick="switchTab('skills')" class="tab-btn tab-btn-flex"><span>✨ 鄰里人名冊與積分榜</span></button>
             </div>
 
+    
             <div id="skills-leaderboard-section" class="hidden leaderboard-panel">
+                
                 <div class="search-box-card">
                     <div>
                         <h4 class="search-title">
@@ -956,7 +1014,7 @@ justify-content: flex-start; /* 關鍵：所有元素靠左緊貼，不平均分
                     <div id="leaderboard-target" class="leaderboard-container"></div>
                 </div>
             </div>
-
+            <div id="skill-filter-bar-container" class="hidden" style="width: 100%; margin-bottom: 16px;"></div>
             <div id="posts-container" class="card-grid"></div>
         </div>
     </main>
@@ -989,7 +1047,7 @@ justify-content: flex-start; /* 關鍵：所有元素靠左緊貼，不平均分
                     <input type="text" id="join-name" required class="input-field">
                 </div>
                 <div>
-                    <label class="input-label">您的聯絡方式</label>
+                    <label class="input-label">您的聯絡方式 (IG / 電話)</label>
                     <input type="text" id="join-ig" required class="input-field">
                 </div>
                 <button type="submit" class="btn-form-submit-orange">確認接下此委託</button>
@@ -1029,29 +1087,41 @@ justify-content: flex-start; /* 關鍵：所有元素靠左緊貼，不平均分
                 <div class="input-block-bg">
                     <label class="input-label">委託人標誌</label>
                     <div style="display: flex; align-items: center; gap: 1rem;">
-                        <div onclick="toggleEmojiBank('post')" id="current-avatar-preview" class="avatar-preview-circle">🙋‍♂️</div>
+                       <div onclick="toggleEmojiBank('post')" id="current-avatar-preview" class="avatar-preview-circle" style="cursor: pointer;">🙋‍♂️</div>
                     </div>
                     <input type="hidden" id="selected-emoji" value="🙋‍♂️">
+                    <!-- ⚠️ 這裡必須要有 id="emoji-bank-post" 對應你的 JS -->
+    <div id="emoji-bank-post" class="hidden" style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin-top: 10px; padding: 10px; background: #fff; border: 1px solid #ddd; border-radius: 8px;">
+        <div onclick="selectEmoji('🙋‍♂️', 'post', this)" class="avatar-preview-circle" style="cursor: pointer; text-align: center; font-size: 1.3rem;">🙋‍♂️</div>
+        <div onclick="selectEmoji('🙋‍♀️', 'post', this)" class="avatar-preview-circle" style="cursor: pointer; text-align: center; font-size: 1.3rem;">🙋‍♀️</div>
+        <div onclick="selectEmoji('🧑‍💻', 'post', this)" class="avatar-preview-circle" style="cursor: pointer; text-align: center; font-size: 1.3rem;">🧑‍💻</div>
+        <div onclick="selectEmoji('👩‍🎨', 'post', this)" class="avatar-preview-circle" style="cursor: pointer; text-align: center; font-size: 1.3rem;">👩‍🎨</div>
+        <div onclick="selectEmoji('🐱', 'post', this)" class="avatar-preview-circle" style="cursor: pointer; text-align: center; font-size: 1.3rem;">🐱</div>
+        <div onclick="selectEmoji('🦊', 'post', this)" class="avatar-preview-circle" style="cursor: pointer; text-align: center; font-size: 1.3rem;">🦊</div>
+        <div onclick="selectEmoji('🦸‍♂️', 'post', this)" class="avatar-preview-circle" style="cursor: pointer; text-align: center; font-size: 1.3rem;">🦸‍♂️</div>
+        <div onclick="selectEmoji('💜', 'post', this)" class="avatar-preview-circle" style="cursor: pointer; text-align: center; font-size: 1.3rem;">💜</div>
+        <div onclick="selectEmoji('⭐', 'post', this)" class="avatar-preview-circle" style="cursor: pointer; text-align: center; font-size: 1.3rem;">⭐</div>
+    </div>
                 </div>
                 <div>
                     <label class="input-label">委託的事情</label>
-                    <input type="text" id="taskTitleInput" required class="input-field">
+                    <input type="text" id="taskTitleInput" required class="input-field" placeholder="請簡單填寫">
                 </div>
                 <div class="form-row-grid">
                     <div><label class="input-label">您的稱呼</label><input type="text" id="clientNameInput" required class="input-field"></div>
-                    <div><label class="input-label">您的聯絡方式</label><input type="text" id="clientContactInput" required class="input-field"></div>
+                    <div><label class="input-label">您的聯絡方式 (IG / 電話)</label><input type="text" id="clientContactInput" required class="input-field" placeholder="🔒 僅平台持有人可見"></div>
                 </div>
                 <div class="form-row-grid">
-                    <div><label class="input-label">限制條件</label><input type="text" id="taskTagInput" required class="input-field"></div>
-                    <div><label class="input-label">報酬</label><input type="text" id="rewardInput" required class="input-field"></div>
+                    <div><label class="input-label">限制條件 (如無請填 / )</label><input type="text" id="taskTagInput" required class="input-field" placeholder="指定特定條件持有者"></div>
+                    <div><label class="input-label">額外報酬 (如無請填 / )</label><input type="text" id="rewardInput" required class="input-field" placeholder="增加他人接單的誘因"></div>
                 </div>
                 <div>
                     <label class="input-label">委託的詳細說明</label>
-                    <textarea id="taskDetailsInput" required rows="3" class="input-field input-field-textarea"></textarea>
+                    <textarea id="taskDetailsInput" required rows="3" class="input-field input-field-textarea" placeholder="請儘量詳細說明"></textarea>
                 </div>
                 <div class="input-block-orange">
                     <label class="input-label input-label-orange">設定管理密碼</label>
-                    <input type="password" id="postPasswordInput" required class="input-password-special">
+                    <input type="password" id="postPasswordInput" required class="input-password-special" placeholder="此密碼用於查看接單人資料及匯報完成，請務必牢記。"></p>
                 </div>
                 <button type="submit" class="btn-form-submit-orange">發佈並上傳至萬事屋</button>
             </form>
@@ -1073,18 +1143,31 @@ justify-content: flex-start; /* 關鍵：所有元素靠左緊貼，不平均分
                         <div onclick="toggleEmojiBank('skill')" id="skill-avatar-preview" class="avatar-preview-circle avatar-preview-stone">🧑‍🎨</div>
                     </div>
                     <input type="hidden" id="skill-selected-emoji" value="🧑‍🎨">
+                    <!-- ⚠️ 這裡必須要有 id="emoji-bank-skill" 對應你的 JS -->
+    <div id="emoji-bank-skill" class="hidden" style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin-top: 10px; padding: 10px; background: #fff; border: 1px solid #ddd; border-radius: 8px;">
+        <div onclick="selectEmoji('🙋‍♂️', 'skill', this)" class="avatar-preview-circle" style="cursor: pointer; text-align: center; font-size: 1.3rem;">🙋‍♂️</div>
+        <div onclick="selectEmoji('🙋‍♀️', 'skill', this)" class="avatar-preview-circle" style="cursor: pointer; text-align: center; font-size: 1.3rem;">🙋‍♀️</div>
+        <div onclick="selectEmoji('🧑‍💻', 'skill', this)" class="avatar-preview-circle" style="cursor: pointer; text-align: center; font-size: 1.3rem;">🧑‍💻</div>
+        <div onclick="selectEmoji('👩‍🎨', 'skill', this)" class="avatar-preview-circle" style="cursor: pointer; text-align: center; font-size: 1.3rem;">👩‍🎨</div>
+        <div onclick="selectEmoji('🐱', 'skill', this)" class="avatar-preview-circle" style="cursor: pointer; text-align: center; font-size: 1.3rem;">🐱</div>
+        <div onclick="selectEmoji('🦊', 'skill', this)" class="avatar-preview-circle" style="cursor: pointer; text-align: center; font-size: 1.3rem;">🦊</div>
+        <div onclick="selectEmoji('🦸‍♂️', 'skill', this)" class="avatar-preview-circle" style="cursor: pointer; text-align: center; font-size: 1.3rem;">🦸‍♂️</div>
+        <div onclick="selectEmoji('💜', 'skill', this)" class="avatar-preview-circle" style="cursor: pointer; text-align: center; font-size: 1.3rem;">💜</div>
+        <div onclick="selectEmoji('⭐', 'skill', this)" class="avatar-preview-circle" style="cursor: pointer; text-align: center; font-size: 1.3rem;">⭐</div>
+    </div>
                 </div>
                 <div>
                     <label class="input-label">鄰里人的姓名</label>
                     <input type="text" id="skillNameInput" required class="input-field input-field-stone">
                 </div>
                 <div class="form-row-grid">
-                    <div><label class="input-label">技能標籤</label><input type="text" id="skillTagInput" required class="input-field input-field-stone"></div>
-                    <div><label class="input-label">聯絡方法</label><input type="text" id="skillContactInput" required class="input-field input-field-stone"></div>
+                    <div><label class="input-label">慣常使用的技能</label><input type="text" id="skillTagInput" required class="input-field input-field-stone" placeholder="日常會使用的技能/興趣"></div>
+                    <div><label class="input-label">聯絡方法</label><input type="text" id="skillContactInput" required class="input-field input-field-stone" placeholder="🔒 僅平台持有人可見"></div>
+                    <div><label class="input-label">正在研習的興趣</label><input type="text" id="skillLearningInput" required class="input-field input-field-stone" placeholder="學習中的技能/興趣"></div>
                 </div>
                 <div>
-                    <label class="input-label">個人專長介紹</label>
-                    <textarea id="skillDescInput" required rows="3" class="input-field input-field-stone input-field-textarea"></textarea>
+                    <label class="input-label">社會認可的資格</label>
+                    <textarea id="skillDescInput" required rows="3" class="input-field input-field-stone input-field-textarea" placeholder="一些認可的資格"></textarea>
                 </div>
                 <button type="submit" class="btn-form-submit-stone">新增至鄰里人技能名冊</button>
             </form>
@@ -1114,6 +1197,7 @@ justify-content: flex-start; /* 關鍵：所有元素靠左緊貼，不平均分
         window.onload = function() {
             fetchPostsFromSupabase();
             fetchSkillsFromSupabase(); 
+            fetchAllUserRecordsFromSupabase();
             setupRandomDefaultAvatar();
         };
 
@@ -1143,21 +1227,87 @@ justify-content: flex-start; /* 關鍵：所有元素靠左緊貼，不平均分
             else { renderPosts(); } 
         }
 
-        // 計算每位鄰里人獲得的總萬事分
-        function countAllPoints() {
-            const scores = {};
-            posts.forEach(post => {
-                const isComp = post.iscompleted !== undefined ? post.iscompleted : post.isCompleted;
-                if (isComp && post.completed_by_contact) {
-                    const contact = post.completed_by_contact.trim();
-                    if (!scores[contact]) {
-                        scores[contact] = { name: post.completed_by_name || '神祕鄰里人', points: 0 };
-                    }
-                    scores[contact].points += 1;
-                }
-            });
-            return scores;
+let allUserRecords = []; // 存放從 alluser_record 撈取的所有使用者積分資料
+
+// 網頁載入時除了原本的 fetch，多加這行
+// fetchAllUserRecordsFromSupabase();
+async function fetchAllUserRecordsFromSupabase() {
+    try {
+        const { data, error } = await client.from('alluser_record').select('*');
+        if (error) throw error;
+        allUserRecords = data || [];
+        refreshView();
+    } catch (err) { console.error("讀取用戶紀錄失敗:", err.message); }
+}
+
+// 計算某個聯絡人已經發布了幾次任務
+function countUserPosts(contact) {
+    if (!contact) return 0;
+    const cleanContact = contact.trim();
+    return posts.filter(p => p.clientcontact && p.clientcontact.trim() === cleanContact).length;
+}
+
+// 直接從 alluser_record 取得所有人的分數對應表
+function countAllPoints() {
+    const scores = {};
+    allUserRecords.forEach(record => {
+        if (record.contact) {
+            const cleanContact = record.contact.trim();
+            scores[cleanContact] = {
+                name: record.name || '神祕鄰里人',
+                points: record.amount || 0
+            };
         }
+    });
+    return scores;
+}
+
+// 請確認這段函式有完整貼在你的 JS 檔案中！
+async function updateUserPointsInSupabase(contact, name, pointChange) {
+    if (!contact) return;
+    const cleanContact = contact.trim();
+    const cleanName = (name && name !== '神祕鄰里人') ? name : null;
+
+    try {
+        const { data: existing, error: fetchError } = await client
+            .from('alluser_record')
+            .select('*')
+            .eq('contact', cleanContact)
+            .maybeSingle();
+
+        if (fetchError) throw fetchError;
+
+        if (existing) {
+            const newAmount = (existing.amount || 0) + pointChange;
+            const updateData = { amount: newAmount };
+            if (cleanName) updateData.name = cleanName;
+
+            const { error: updateError } = await client
+                .from('alluser_record')
+                .update(updateData)
+                .eq('id', existing.id);
+
+            if (updateError) throw updateError;
+        } else {
+            const newRecord = {
+                contact: cleanContact,
+                name: cleanName || '神祕鄰里人',
+                amount: pointChange
+            };
+
+            const { error: insertError } = await client
+                .from('alluser_record')
+                .insert([newRecord]);
+
+            if (insertError) throw insertError;
+        }
+
+        await fetchAllUserRecordsFromSupabase();
+    } catch (err) {
+        console.error("更新用戶積分失敗:", err.message);
+        alert("⚠️ 寫入 alluser_record 失敗: " + err.message);
+    }
+}
 
         // 快速查詢個人累積點數
         function queryPersonalPoints() {
@@ -1175,7 +1325,7 @@ justify-content: flex-start; /* 關鍵：所有元素靠左緊貼，不平均分
  // 頁籤切換控制邏輯
 function switchTab(tabName) {
     currentTab = tabName;
-    
+    currentTagFilter = 'all';
     ['tab-active', 'tab-completed', 'tab-skills'].forEach(t => {
         const el = document.getElementById(t);
         if(el) el.className = "tab-btn";
@@ -1201,47 +1351,119 @@ function switchTab(tabName) {
     renderPosts();
 }
 
-// 主列表渲染主程式
-function renderPosts() {
-    const container = document.getElementById('posts-container');
-    if(!container) return;
-    container.innerHTML = '';
 
-    const allScores = countAllPoints();
+// ==========================================
+        // 1. 全域變數與篩選狀態
+        // ==========================================
+        let currentTagFilter = 'all';
 
-    if (currentTab === 'skills') {
-        const leaderboardTarget = document.getElementById('leaderboard-target');
-        if(leaderboardTarget) {
-            const sortedHeroes = Object.keys(allScores)
-                .map(k => ({ contact: k, ...allScores[k] }))
-                .sort((a,b) => b.points - a.points)
-                .slice(0, 3);
+        // 2. 標籤轉 Hashtag 的處理函式（升級為可點擊過濾）
+        function formatHashtags(tagString) {
+            if (!tagString || tagString === '/') return '';
             
-            if(sortedHeroes.length === 0) {
-                // 去格式化：改為自訂的榜單空狀態文字樣式 class
-                leaderboardTarget.innerHTML = `<p class="leaderboard-empty-text">尚無得點紀錄，等待第一位英雄誕生！</p>`;
-            } else {
-                const medals = ['🥇', '🥈', '🥉'];
-                // 去格式化：改用 .leaderboard-item 區塊，內含排行文字與積分
-                leaderboardTarget.innerHTML = sortedHeroes.map((h, i) => `
-                    <div class="leaderboard-item">
-                        <span class="leaderboard-item-info">${medals[i]} <strong>${h.name}</strong> (${h.contact})</span>
-                        <span class="leaderboard-item-points">🪙 ${h.points} 分</span>
-                    </div>
-                `).join('');
-            }
+            return tagString
+                .trim()                        
+                .split(/\s+/)                  
+                .map(tag => {
+                    const cleanTag = tag.startsWith('#') ? tag : `#${tag}`;
+                    return `<span onclick="event.stopPropagation(); filterByTag('${cleanTag}')" style="cursor: pointer; display: inline-block; margin-right: 4px;">${cleanTag}</span>`;
+                }) 
+                .join(' ');                    
         }
 
-        if (skills.length === 0) {
-            // 去格式化：使用自訂無資料提示樣式
-            container.innerHTML = '<p class="container-empty-hint">目前尚無登記鄰里人技能。</p>';
-            return;
+        // 3. 點擊標籤進行過濾的函式
+        function filterByTag(tag) {
+            currentTagFilter = tag;
+            renderPosts(); // 重新渲染列表
         }
-        
-        skills.forEach(skill => {
+
+        // ==========================================
+        // 主列表渲染主程式 (整合後的版本)
+        // ==========================================
+        function renderPosts() {
+            const container = document.getElementById('posts-container');
+            if(!container) return;
+            container.innerHTML = '';
+
+            const allScores = countAllPoints();
+
+            // 1. 英雄榜區塊維持不變
+            if (currentTab === 'skills') {
+                const leaderboardTarget = document.getElementById('leaderboard-target');
+                if(leaderboardTarget) {
+                    const sortedHeroes = Object.keys(allScores)
+                        .map(k => ({ contact: k, ...allScores[k] }))
+                        .sort((a,b) => b.points - a.points)
+                        .slice(0, 3);
+                    
+                    if(sortedHeroes.length === 0) {
+                        leaderboardTarget.innerHTML = `<p class="leaderboard-empty-text">尚無得點紀錄，等待第一位英雄誕生！</p>`;
+                    } else {
+                        const medals = ['🥇', '🥈', '🥉'];
+                        leaderboardTarget.innerHTML = sortedHeroes.map((h, i) => `
+                            <div class="leaderboard-item">
+                                <span class="leaderboard-item-info">${medals[i]} <strong>${h.name}</strong> </span>
+                                <span class="leaderboard-item-points">🪙 ${h.points} 分</span>
+                            </div>
+                        `).join('');
+                    }
+                }
+            }
+
+            // 取得獨立的篩選列容器 (共用同一個 container)
+            const filterBarContainer = document.getElementById('skill-filter-bar-container');
+
+            // ==========================================
+            // 分支 A：如果是 'skills' 分頁
+            // ==========================================
+            if (currentTab === 'skills') {
+                if (skills.length === 0) {
+                    if(filterBarContainer) filterBarContainer.innerHTML = '';
+                    container.innerHTML = '<p class="container-empty-hint">目前尚無登記鄰里人技能。</p>';
+                    return;
+                }
+
+                let allTagsSet = new Set();
+                skills.forEach(skill => {
+                    if (skill.skilltag) {
+                        skill.skilltag.trim().split(/\s+/).forEach(t => allTagsSet.add(t.startsWith('#') ? t : `#${t}`));
+                    }
+                    if (skill.learning && skill.learning !== '/') {
+                        skill.learning.trim().split(/\s+/).forEach(t => allTagsSet.add(t.startsWith('#') ? t : `#${t}`));
+                    }
+                });
+
+                // 渲染頂部篩選列
+                if(filterBarContainer) {
+                    filterBarContainer.classList.remove('hidden');
+                    let filterHtml = `
+                        <div style="width: 100%; display: flex; gap: 8px; overflow-x: auto; padding-bottom: 5px; white-space: nowrap;">
+                            <button onclick="filterByTag('all')" style="padding: 6px 16px; font-size: 0.85rem; border-radius: 16px; border: 1px solid #ddd; background: ${currentTagFilter === 'all' ? '#333' : '#fff'}; color: ${currentTagFilter === 'all' ? '#fff' : '#333'}; cursor: pointer;">全部顯示</button>
+                    `;
+                    allTagsSet.forEach(tag => {
+                        const isActive = currentTagFilter === tag;
+                        filterHtml += `<button onclick="filterByTag('${tag}')" style="padding: 6px 16px; font-size: 0.85rem; border-radius: 16px; border: 1px solid #ddd; background: ${isActive ? '#333' : '#fff'}; color: ${isActive ? '#fff' : '#333'}; cursor: pointer;">${tag}</button>`;
+                    });
+                    filterHtml += `</div>`;
+                    filterBarContainer.innerHTML = filterHtml;
+                }
+
+                const filteredSkills = skills.filter(skill => {
+                    if (currentTagFilter === 'all') return true;
+                    const tText = (skill.skilltag || '') + ' ' + (skill.learning || '');
+                    return tText.includes(currentTagFilter.replace('#', ''));
+                });
+
+                if (filteredSkills.length === 0) {
+                    container.innerHTML = '<p class="container-empty-hint">沒有找到符合此標籤的鄰里人。</p>';
+                    return;
+                }
+
+        // 渲染卡片
+        filteredSkills.forEach(skill => {
             const card = document.createElement('div');
-            // 去格式化：將鄰里人技能同樣包裝成「白色卡片樣式」
             card.className = "task-card";
+            
             const adminTools = isAdmin ? `
                 <div class="card-admin-tools">
                     <button onclick="deleteSkill('${skill.id}')" class="btn-card-delete">🗑️</button>
@@ -1249,98 +1471,144 @@ function renderPosts() {
             
             const myPoint = allScores[skill.contact?.trim()]?.points || 0;
 
+            const formattedTags = formatHashtags(skill.skilltag);
+            const formattedLearning = formatHashtags(skill.learning);
+ 
+            // 💡 判斷是否有填寫「專長」，有填寫就加上「📜 應用中：」前綴
+            const skillTagBadge = skill.skilltag && skill.skilltag !== '/' ? 
+                `<span class="tag-stone" style="background: #fef3c7; color: #92400e; padding: 2px 8px; border-radius: 4px; font-size: 0.85rem; display: inline-block; margin-Top: 0.5rem">📜 應用中：${formattedTags}</span>` : '';
+            const learningBadge = skill.learning && skill.learning !== '/' ? 
+                `<span class="tag-learning" style="background: #f3f4f6; color: #4b5563; padding: 2px 8px; border-radius: 4px; font-size: 0.85rem; display: inline-block; margin-Top: 0.5rem;">📚 研習中：${formattedLearning}</span>` : '';
+
             card.innerHTML = `
                 <div>
                     <div class="task-card-header">
                         <div class="avatar-circle-stone">${skill.emoji || '🧑‍🎨'}</div>
-                        <div>
+                        <div style="flex: 1;">
                             <div class="title-with-badge">
-                                <h3 class="task-card-title">${skill.name}</h3>
-                                <span class="point-badge">🪙 萬事分: ${myPoint}</span>
+                                <h3 class="task-card-title">${skill.name}</h3> 
+                                <span class="point-badge">🪙 ${myPoint}</span>
                             </div>
-                            <span class="tag-stone">${skill.skilltag || ''}</span>
                         </div>
                     </div>
                     ${adminTools}
-                    <p class="task-card-description">${skill.description}</p>
+                    ${skillTagBadge}
+                    <br>
+                    ${learningBadge}
                 </div>
-                <div class="task-card-footer">
-                    <span class="contact-info-text">管道: <strong>${skill.contact}</strong></span>
-                    <button onclick="copyContactInfo('${skill.contact}')" class="btn-card-copy">📋 複製資料</button>
+                <div class="task-card-footer" style="display: flex; flex-wrap: wrap; gap: 4px; align-items: center;">
+                    <p class="task-card-description">${skill.description}</p>
+                    
                 </div>
             `;
             container.appendChild(card);
         });
         return;
-    }
+    } 
+    // ==========================================
+            // 分支 B：如果是 'active' 或 'completed' 分頁（任務列表）
+            // ==========================================
+            else {
+                const isCompletedTarget = (currentTab === 'completed');
+                
+                // 1. 先抓出符合當前分頁狀態的貼文
+                const baseFilteredPosts = posts.filter(post => {
+                    const compVal = post.iscompleted !== undefined ? post.iscompleted : post.isCompleted;
+                    return !!compVal === isCompletedTarget;
+                });
 
-    const isCompletedTarget = (currentTab === 'completed');
-    const filteredPosts = posts.filter(post => {
-        const compVal = post.iscompleted !== undefined ? post.iscompleted : post.isCompleted;
-        return !!compVal === isCompletedTarget;
-    });
-    
-    if (filteredPosts.length === 0) {
-        // 去格式化：使用自訂無資料提示樣式
-        container.innerHTML = '<p class="container-empty-hint">此分類目前沒有委託案件。</p>';
-        return;
-    }
+                // 2. 收集這些貼文當中的所有 tasktag
+                let postTagsSet = new Set();
+                baseFilteredPosts.forEach(post => {
+                    if (post.tasktag) {
+                        post.tasktag.trim().split(/\s+/).forEach(t => postTagsSet.add(t.startsWith('#') ? t : `#${t}`));
+                    }
+                });
 
-    filteredPosts.forEach(post => {
-        const hList = post.heroeslist || [];
-        const count = hList.length;
-        const card = document.createElement('div');
-        
-        const cEmoji = post.clientemoji || '🙋‍♂️';
-        const tTitle = post.tasktitle || '';
-        const cName = post.clientname || '';
-        const tTag = post.tasktag || '';
-        const tDetails = post.taskdetails || '';
-        const rwd = post.reward || '';
-        const isComp = post.iscompleted !== undefined ? post.iscompleted : post.isCompleted;
-
-        // 【核心修改】：全面換成自訂的白色卡片樣式 Class
-        card.className = "task-card clickable-group";
-        card.onclick = (e) => { if (!e.target.closest('button')) { goToPostDetail(post.id); } };
-
-        let adminActionHtml = '';
-        if (isAdmin) {
-            // 去格式化：移除 bg-red-50 text-red-600 等 Tailwind
-            adminActionHtml += `<button onclick="deletePost('${post.id}')" class="btn-card-delete">🗑️</button>`;
-        }
-
-        card.innerHTML = `
-            <div>
-                <div class="task-card-header">
-                    <div class="avatar-circle-orange">${cEmoji}</div>
-                    <div style="flex: 1; min-width: 0;">
-                        <h3 class="task-card-title text-ellipsis-2line">${tTitle}</h3>
-                        <p class="task-card-subtitle">委託人：${cName} • ${count}人已接單</p>
-                    </div>
-                </div>
-                <div class="card-admin-tools">${adminActionHtml}</div>
-                <div style="margin-bottom: 0.5rem;">
-                    <span class="tag-orange">${tTag}</span>
-                </div>
-                <p class="task-card-description text-ellipsis-3line">${tDetails}</p>
-            </div>
-            <div class="task-card-footer">
-                <div class="reward-info-text">
-                    <span class="reward-highlight">💰 報酬：${rwd}</span> • <span>${post.timeAgo}</span>
-                </div>
-                ${isComp 
-                    ? `<span class="badge-status-success">
-                        <span class="status-success-title">圓滿解決 🏮</span>
-                        <span class="status-success-subtitle">貢獻者: ${post.completed_by_name || '無'}</span>
-                       </span>`
-                    : `<button onclick="openJoinModal('${post.id}')" class="btn-base btn-orange">接受委託</button>`
+                // 3. 共用同一個 filterBarContainer 渲染頂部任務標籤篩選列
+                if (filterBarContainer && baseFilteredPosts.length > 0) {
+                    filterBarContainer.classList.remove('hidden');
+                    let filterHtml = `
+                        <div style="width: 100%; display: flex; gap: 8px; overflow-x: auto; padding-bottom: 5px; white-space: nowrap;">
+                            <button onclick="filterByTag('all')" style="padding: 6px 16px; font-size: 0.85rem; border-radius: 16px; border: 1px solid #ddd; background: ${currentTagFilter === 'all' ? '#333' : '#fff'}; color: ${currentTagFilter === 'all' ? '#fff' : '#333'}; cursor: pointer;">全部顯示</button>
+                    `;
+                    postTagsSet.forEach(tag => {
+                        const isActive = currentTagFilter === tag;
+                        filterHtml += `<button onclick="filterByTag('${tag}')" style="padding: 6px 16px; font-size: 0.85rem; border-radius: 16px; border: 1px solid #ddd; background: ${isActive ? '#333' : '#fff'}; color: ${isActive ? '#fff' : '#333'}; cursor: pointer;">${tag}</button>`;
+                    });
+                    filterHtml += `</div>`;
+                    filterBarContainer.innerHTML = filterHtml;
+                } else if (filterBarContainer) {
+                    filterBarContainer.classList.add('hidden');
                 }
-            </div>
-        `;
-        container.appendChild(card);
-    });
-    setTimeout(() => { lucide.createIcons(); }, 100);
-}
+
+                // 4. 根據 currentTagFilter 過濾任務貼文
+                const filteredPosts = baseFilteredPosts.filter(post => {
+                    if (currentTagFilter === 'all') return true;
+                    const tText = post.tasktag || '';
+                    return tText.includes(currentTagFilter.replace('#', ''));
+                });
+
+                if (filteredPosts.length === 0) {
+                    container.innerHTML = '<p class="container-empty-hint">此分類目前沒有符合此標籤的委託案件。</p>';
+                    return;
+                }
+
+                // 5. 渲染任務卡片 (這裡可以順便用你寫好的 formatHashtags 讓卡片上的標籤也能點擊！)
+                filteredPosts.forEach(post => {
+                    const hList = post.heroeslist || [];
+                    const count = hList.length;
+                    const card = document.createElement('div');
+                    
+                    const cEmoji = post.clientemoji || '🙋‍♂️';
+                    const tTitle = post.tasktitle || '';
+                    const cName = post.clientname || '';
+                    const tTag = formatHashtags(post.tasktag); // 💡 升級：讓任務卡片上的標籤也變成可點擊的 Hashtag！
+                    const tDetails = post.taskdetails || '';
+                    const rwd = post.reward || '';
+                    const isComp = post.iscompleted !== undefined ? post.iscompleted : post.isCompleted;
+
+                    card.className = "task-card clickable-group";
+                    card.onclick = (e) => { if (!e.target.closest('button')) { goToPostDetail(post.id); } };
+
+                    let adminActionHtml = '';
+                    if (isAdmin) {
+                        adminActionHtml += `<button onclick="deletePost('${post.id}')" class="btn-card-delete">🗑️</button>`;
+                    }
+
+                    card.innerHTML = `
+                        <div>
+                            <div class="task-card-header">
+                                <div class="avatar-circle-orange">${cEmoji}</div>
+                                <div style="flex: 1; min-width: 0;">
+                                    <h3 class="task-card-title text-ellipsis-2line">${tTitle}</h3>
+                                    <p class="task-card-subtitle">委託人：${cName} • ${count}人已接單</p>
+                                </div>
+                            </div>
+                            <div class="card-admin-tools">${adminActionHtml}</div>
+                            <div style="margin-bottom: 0.5rem;">
+                                <span class="tag-orange">${tTag}</span>
+                            </div>
+                            <p class="task-card-description text-ellipsis-5line">${tDetails}</p>
+                        </div>
+                        <div class="task-card-footer">
+                            <div class="reward-info-text">
+                                <span class="reward-highlight">💰 報酬：${rwd}</span> • <span>${post.timeAgo}</span>
+                            </div>
+                            ${isComp 
+                                ? `<span class="badge-status-success">
+                                    <span class="status-success-title">圓滿解決 🏮</span>
+                                    <span class="status-success-subtitle">貢獻者: ${post.completed_by_name || '無'}</span>
+                                   </span>`
+                                : `<button onclick="openJoinModal('${post.id}')" class="btn-base btn-orange">接受委託</button>`
+                            }
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+                setTimeout(() => { lucide.createIcons(); }, 100);
+            }
+        }
 
         // 導向至單一案件詳細內頁
         function goToPostDetail(postId) {
@@ -1413,7 +1681,8 @@ function renderPosts() {
                     : hList.map(person => `
                         <div class="flex justify-between items-center bg-gray-50 p-2.5 rounded-xl border border-gray-100">
                             <span class="font-bold text-gray-700 text-xs">🥷 接單人：${person.name}</span>
-                            <button onclick="copyContactInfo('${person.contact}')" class="text-[11px] text-orange-600 bg-orange-50 px-2.5 py-1 rounded-lg border border-orange-100 font-bold">📋 複製資料</button>
+                            <span class="font-bold text-gray-700 text-xs">📋 聯絡：${person.contact}</span>
+                            <button onclick="copyContactInfo('${person.contact}')" class="text-[11px] text-orange-600 bg-orange-50 px-2.5 py-1 rounded-lg border border-orange-100 font-bold">複製</button>
                         </div>
                     `).join('');
 
@@ -1442,7 +1711,7 @@ function renderPosts() {
             }
 
             targetDiv.innerHTML = `
-                <div class="bg-white rounded-3xl p-6 md:p-10 shadow-sm border border-amber-100 w-full space-y-6">
+                <div class="max-w-3xl mx-auto bg-white rounded-3xl p-6 md:p-10 shadow-sm border border-amber-100 w-full space-y-6">
                     <div class="flex items-center justify-between pb-4 border-b border-gray-100">
                         <div class="flex items-center space-x-4">
                             <div class="w-14 h-14 rounded-full ${bgClor} flex items-center justify-center text-3xl shadow-inner">${post.clientemoji || '🙋‍♂️'}</div>
@@ -1459,12 +1728,6 @@ function renderPosts() {
                     </div>
                     <div class="bg-amber-50/30 rounded-2xl p-4 grid grid-cols-2 gap-4 text-sm border border-amber-100">
                         <div><span class="block text-xs text-gray-400 mb-0.5">💰 額外謝禮 </span><span class="font-bold text-amber-800">${rwd}</span></div>
-                        <div>
-                            <span class="block text-xs text-gray-400 mb-0.5">聯絡方法</span>
-                            <span onclick="copyContactInfo('${cContact}')" class="font-bold text-orange-600 cursor-pointer underline flex items-center gap-1">
-                                <span>${cContact}</span>
-                            </span>
-                        </div>
                     </div>
                     <div class="pt-2 flex items-center justify-between">
                         <div class="text-sm text-gray-600 flex items-center space-x-1"><i data-lucide="users" class="w-4 h-4 text-orange-600"></i><span>已有 <strong class="text-gray-900 font-bold text-base">${hList.length}</strong> 位鄰里人挺身而出</span></div>
@@ -1550,7 +1813,7 @@ function renderPosts() {
                 closeCompleteModal();
                 if(currentViewingPostId === postId) backToHomeList();
                 await fetchPostsFromSupabase();
-                
+                await updateUserPointsInSupabase(cContact, cName, 1); // 英雄 +1 分
                 if(cName) {
                     alert(`🏮 結案成功！恭喜【${cName}】獲得了 1 點萬事分！`);
                 } else {
@@ -1582,51 +1845,96 @@ function renderPosts() {
             } catch (err) { alert("接受委託失敗: " + err.message); }
         }
 
-        // 新增發布委託表單處理
-        async function handleFormSubmit(event) {
-            event.preventDefault();
-            const bgColors = ['bg-amber-50', 'bg-orange-50', 'bg-yellow-50', 'bg-stone-100'];
-            const newPost = {
-                tasktitle: document.getElementById('taskTitleInput').value.trim(), 
-                clientname: document.getElementById('clientNameInput').value,
-                clientcontact: document.getElementById('clientContactInput').value,
-                tasktag: document.getElementById('taskTagInput').value,
-                taskdetails: document.getElementById('taskDetailsInput').value,
-                reward: document.getElementById('rewardInput').value,
-                clientemoji: document.getElementById('selected-emoji').value,
-                cardbgcolor: bgColors[Math.floor(Math.random() * bgColors.length)],
-                iscompleted: false,
-                heroeslist: [],
-                password: document.getElementById('postPasswordInput').value.trim()
-            };
+// 新增發布委託表單處理（加入萬事分扣除與上限檢查）
+async function handleFormSubmit(event) {
+    event.preventDefault();
+    
+    const clientContact = document.getElementById('clientContactInput').value.trim();
+    const clientName = document.getElementById('clientNameInput').value.trim();
+    
+    // 💡 檢查此聯絡方式已發布過的任務數量
+    const existingPostCount = countUserPosts(clientContact);
+    
+    if (existingPostCount >= 2) {
+        alert("⚠️ 每個帳號/聯絡方式最多只能發布 2 次任務（扣除 2 點萬事分上限），您已達發布上限！");
+        return;
+    }
 
-            try {
-                const { error } = await client.from(POSTS_TABLE).insert([newPost]);
-                if (error) throw error;
-                closeUploadModal();
-                setupRandomDefaultAvatar();
-                await fetchPostsFromSupabase();
-                alert("✨ 委託發布成功！請記好您的管理密碼，以便日後回來查看名冊或結案！");
-            } catch (err) { alert("發布新委託失敗: " + err.message); }
-        }
+    // 💡 處理標籤：將空白隔開的詞自動補上 '#'
+    const rawTagInput = document.getElementById('taskTagInput').value.trim();
+    const formattedTaskTag = rawTagInput
+        ? rawTagInput.split(/\s+/).map(t => (t.startsWith('#') ? t : `#${t}`)).join(' ')
+        : '#一般委託';
 
-        // 新增鄰里人技能表單處理
+    const bgColors = ['bg-amber-50', 'bg-orange-50', 'bg-yellow-50', 'bg-stone-100'];
+    const newPost = {
+        tasktitle: document.getElementById('taskTitleInput').value.trim(), 
+        clientname: clientName || '神祕鄰里人',
+        clientcontact: clientContact,
+        tasktag: formattedTaskTag, // 修正：這裡改成使用處理好的 formattedTaskTag！
+        taskdetails: document.getElementById('taskDetailsInput').value.trim(),
+        reward: document.getElementById('rewardInput').value.trim(),
+        clientemoji: document.getElementById('selected-emoji').value,
+        cardbgcolor: bgColors[Math.floor(Math.random() * bgColors.length)],
+        iscompleted: false,
+        heroeslist: [],
+        password: document.getElementById('postPasswordInput').value.trim()
+    };
+
+    try {
+        // 1. 寫入貼文到 Supabase
+        const { error } = await client.from(POSTS_TABLE).insert([newPost]);
+        if (error) throw error;
+
+        // 2. 扣除發布者的 1 點萬事分（寫入 alluser_record）
+        await updateUserPointsInSupabase(clientContact, clientName, -1);
+
+        closeUploadModal();
+        setupRandomDefaultAvatar();
+        await fetchPostsFromSupabase();
+        // 如果你有拉取 alluser_record 的函數，也可以在這裡呼叫一次以確保排行榜同步：
+        // await fetchAllUserRecordsFromSupabase();
+
+        alert(`✨ 委託發布成功！已為您扣除 1 點萬事分（目前已發布 ${existingPostCount + 1}/2 次）。請記好您的管理密碼！`);
+    } catch (err) { 
+        alert("發布新委託失敗: " + err.message); 
+    }
+}
+        // 新增鄰里人技能表單處理（同步寫入 name & contact 至 alluser_record 並加 1 分）
         async function handleSkillSubmit(event) {
             event.preventDefault();
+            
             const data = {
-                name: document.getElementById('skillNameInput').value,
-                skilltag: document.getElementById('skillTagInput').value,
+                name: document.getElementById('skillNameInput').value.trim(),
+                skilltag: document.getElementById('skillTagInput').value.trim(),
+                learning: document.getElementById('skillLearningInput').value.trim(),
                 contact: document.getElementById('skillContactInput').value.trim(),
-                description: document.getElementById('skillDescInput').value,
+                description: document.getElementById('skillDescInput').value.trim(),
                 emoji: document.getElementById('skill-selected-emoji').value
             };
 
+            // 基本欄位防呆檢查
+            if (!data.name || !data.contact) {
+                alert("請填寫您的稱呼與聯絡管道！");
+                return;
+            }
+
             try {
+                // 1. 將技能資料寫入 skills 資料表
                 const { error } = await client.from(TABLE_NAME).insert([data]);
                 if (error) throw error;
+                
+                // 2. 同步將 name 與 contact 寫入/更新至 alluser_record 並加 1 分
+                await updateUserPointsInSupabase(data.contact, data.name, +1);
+
                 closeSkillModal();
                 await fetchSkillsFromSupabase();
-            } catch (err) { alert("儲存技能失敗: " + err.message); }
+                await fetchAllUserRecordsFromSupabase(); // 確保排行榜與點數即時同步
+
+                alert(`✨ 成功登記技能名冊！已同步您的資料並為您增加 1 點萬事分！`);
+            } catch (err) { 
+                alert("儲存技能失敗: " + err.message); 
+            }
         }
 
         // 複製聯絡資訊
@@ -1731,7 +2039,37 @@ function renderPosts() {
             return `${diffDays} 天前`;
         }
 
-        // ==========================================
+// 管理員手動調整萬事分（直接修改 alluser_record）
+async function adminAdjustPoints(change) {
+    if (!isAdmin) {
+        alert("🔒 只有管理員可以調整萬事分！");
+        return;
+    }
+
+    const contact = document.getElementById('admin-target-contact').value.trim();
+    const name = document.getElementById('admin-target-name').value.trim();
+
+    if (!contact) {
+        alert("請輸入目標聯絡方式 (IG/電話)！");
+        return;
+    }
+
+    try {
+        // 直接利用我們寫好的輔助函數進行加減分
+        await updateUserPointsInSupabase(contact, name, change);
+        
+        alert(`✅ 成功為【${contact}】${change > 0 ? '增加' : '扣除'} 1 點萬事分！`);
+
+        // 清空輸入框
+        document.getElementById('admin-target-contact').value = '';
+        document.getElementById('admin-target-name').value = '';
+
+    } catch (err) {
+        alert("調整萬事分失敗: " + err.message);
+    }
+}
+
+// ==========================================
 // 載入頁首並處理年份（維持原樣）
 // ==========================================  
 fetch('/header.html')
@@ -1830,7 +2168,7 @@ fetch('/header.html')
         window.removeEventListener('resize', adjustNavItems);
         window.addEventListener('resize', adjustNavItems);
     }
-
+  
 // ==========================================
 // 載入頁尾並處理年份（維持原樣）
 // ==========================================
@@ -1849,6 +2187,7 @@ fetch('/header.html')
         }
     })
     .catch(err => console.error("頁尾載入失敗:", err));
+
     </script>
 </body>
 </html>

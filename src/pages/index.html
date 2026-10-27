@@ -1,38 +1,25 @@
----
-// 匯入 Layout
-import BaseLayout from '../layouts/BaseLayout.astro';
----
-<BaseLayout>
-<title>空間客舍 Slow Pace Studio</title>
-<Fragment slot="head">
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>空間客舍 Slow Pace Studio</title>
-        <meta name="description" content="空間客舍 SLOW PACE STUDIO 是一個在二零二四年開業的藝文空間，以創作者為中心，坐落在長沙灣一所褪去舊日鉛華的商場裏，做著交流、分享、思考、創作……等事情。">
-        
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>空間客舍 Slow Pace Studio</title>
+    <meta name="description" content="空間客舍 SLOW PACE STUDIO 是一個在二零二四年開業的藝文空間，以創作者為中心，坐落在長沙灣一所褪去舊日鉛華的商場裏，做著交流、分享、思考、創作……等事情。">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
 
-        <meta name="google-site-verification" content="EH9jBqiuCw-Hotk3g1MO9O579-Wcz_Jlv6v0Up6liJg" />
+<meta name="google-site-verification" content="EH9jBqiuCw-Hotk3g1MO9O579-Wcz_Jlv6v0Up6liJg" />
 
-        <script type="application/ld+json">
-        {
-          "@context": "https://schema.org",
-          "@type": "WebSite",
-          "name": "空間客舍 Slow Pace Studio",
-          "url": "https://studioslowpace.github.io/"
-        }
-        </script>
-
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZBQ95KH0ET"></script>
-        <script is:inline>
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', 'G-ZBQ95KH0ET');
-        </script>
-    </Fragment>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "空間客舍 Slow Pace Studio",
+  "url": "https://studioslowpace.github.io/"
+}
+</script>
 
 
     <style>
@@ -439,7 +426,7 @@ width: 100%;               /* 在手機版預設撐滿父容器 */
 }
 }
     </style>
-
+</head>
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZBQ95KH0ET"></script>
 <script>
@@ -449,13 +436,14 @@ width: 100%;               /* 在手機版預設撐滿父容器 */
 
   gtag('config', 'G-ZBQ95KH0ET');
 </script>
+<body>
 
 
-
+<div id="header-container" class="navbar-wrapper"></div>
 
     <section class="hero-banner">
         <div class="banner__badge-oval">
-            <img src="/images/header_r1.png" class="banner__badge-content" alt="眼鏡插畫徽章" oncontextmenu="return false;" ondragstart="return false;">
+            <img src="images/header_r1.png" class="banner__badge-content" alt="眼鏡插畫徽章" oncontextmenu="return false;" ondragstart="return false;">
         </div>
     </section>
 
@@ -471,7 +459,7 @@ width: 100%;               /* 在手機版預設撐滿父容器 */
             <aside class="content-right">
                 <div class="sticky-brand">
                     <div class="main-avatar">
-                        <img src="/images/logo-square.png" alt="空間客舍 品牌大圖" oncontextmenu="return false;" ondragstart="return false;">
+                        <img src="images/logo-square.png" alt="空間客舍 品牌大圖" oncontextmenu="return false;" ondragstart="return false;">
                     </div>
                 </div>
             </aside>
@@ -483,14 +471,14 @@ width: 100%;               /* 在手機版預設撐滿父容器 */
       <div class="neighbour-card">
         <h2>成為鄰里人</h2>
     <h3>Becoming<br>our<br>neighbour</h3>
-      <img src="/images/neighbour1.PNG" alt="鄰里人" class="neighbour-img" oncontextmenu="return false;" ondragstart="return false;">
+      <img src="images/neighbour1.PNG" alt="鄰里人" class="neighbour-img" oncontextmenu="return false;" ondragstart="return false;">
       <div class="neighbour-info">
         <h4>鄰里人</h4>
         <p>參加活動，即可獲得資格<br>福利：一個月Pass，其後每個活動可獲-$20之優惠</p>
       </div>
       
 
-      <img src="/images/neighbour2.PNG" alt="客舍人" class="neighbour-img2" oncontextmenu="return false;" ondragstart="return false;">
+      <img src="images/neighbour2.PNG" alt="客舍人" class="neighbour-img2" oncontextmenu="return false;" ondragstart="return false;">
       <div class="neighbour-info2">
         <h4>客舍人</h4>
         <p>贊助客舍$300，即可獲得資格<br>福利：三個月Pass，所有讀書會、電影放映、音樂會、傾計會為免費</p>
@@ -504,6 +492,138 @@ width: 100%;               /* 在手機版預設撐滿父容器 */
   </div>
 </section>
 
+    <footer id="global-footer" class="custom-footer"></footer>
+
+    <script>
+// ==========================================
+// 1. 載入頁首（融合「更多」自動收納邏輯）
+// ==========================================
+fetch('header.html')
+    .then(response => response.text())
+    .then(data => {
+        const container = document.getElementById('header-container');
+        if (container) {
+            container.innerHTML = data;
+            setupHeaderMenu(); // 🛠️ 載入完成後，啟動選單核心與自動收納功能
+        }
+    })
+    .catch(err => console.error("頁首載入失敗:", err));
+
+// ==========================================
+// 2. 載入頁尾並處理年份（維持原樣）
+// ==========================================
+fetch('footer.html')
+    .then(response => response.text())
+    .then(data => {
+        const footerContainer = document.getElementById('global-footer');
+        if (footerContainer) {
+            footerContainer.innerHTML = data;
+            
+            // 頁尾載入完成後，更新年份
+            const yearSpan = document.getElementById('current-year');
+            if (yearSpan) {
+                yearSpan.textContent = new Date().getFullYear();
+            }
+        }
+    })
+    .catch(err => console.error("頁尾載入失敗:", err));
+
+// ==========================================
+// 3. 定義 Header 選單邏輯（升級版演算法）
+// ==========================================
+function setupHeaderMenu() {
+    const toggleButton = document.querySelector('.menu-toggle');
+    const navLinks = document.querySelector('.header-nav-links');
+
+    // --- (A) 手機版漢堡選單開關邏輯 ---
+    if (toggleButton && navLinks) {
+        // 使用 onclick 確保不重複綁定事件
+        toggleButton.onclick = function(e) {
+            navLinks.classList.toggle('active');
+            e.stopPropagation();
+        };
+
+        document.onclick = function(e) {
+            if (navLinks.classList.contains('active') && !navLinks.contains(e.target) && e.target !== toggleButton) {
+                navLinks.classList.remove('active');
+            }
+        };
+    }
+
+    // --- (B) 智能偵測寬度：過長項目收進「更多」演算法 ---
+    const mainNav = document.querySelector('.header-nav-links'); // 抓取主導覽列容器
+    if (!mainNav) return;
+
+    // 1. 動態建立「更多」下拉選單結構（如果 header.html 裡面還沒有的話，JS 會自動補上）
+    let moreMenu = document.getElementById('more-menu');
+    let overflowLinks = document.getElementById('overflow-links');
+    
+    if (!moreMenu) {
+        moreMenu = document.createElement('div');
+        moreMenu.id = 'more-menu';
+        moreMenu.className = 'more-dropdown';
+        moreMenu.innerHTML = `
+            <a href="#" class="more-toggle" onclick="return false;">更多 ▾</a>
+            <div class="more-dropdown-content" id="overflow-links"></div>
+        `;
+        mainNav.appendChild(moreMenu);
+        overflowLinks = document.getElementById('overflow-links');
+    }
+
+    // 2. 找出所有原本的連結項目（排除掉「更多」按鈕本身）
+    // 💡 這裡會抓取 nav 裡面所有的 <a> 標籤作為選單項目
+    const allLinks = Array.from(mainNav.children).filter(el => el !== moreMenu && el.tagName === 'A');
+
+    // 3. 核心計算函式
+    function adjustNavItems() {
+        // 📱 如果是手機版（寬度 <= 768px），停止收納演算法，將所有項目還原給漢堡選單垂直排列
+        if (window.innerWidth <= 768) {
+            allLinks.forEach(item => mainNav.insertBefore(item, moreMenu));
+            moreMenu.style.display = 'none';
+            return;
+        }
+
+        // 💻 電腦版自動收納計算
+        moreMenu.style.display = 'none'; // 先隱藏「更多」
+        overflowLinks.innerHTML = '';    // 清空收納盒
+        allLinks.forEach(item => mainNav.insertBefore(item, moreMenu)); // 先把所有項目放回主列以便測量真實寬度
+
+        let navContainerWidth = mainNav.offsetWidth;
+        let totalWidth = 0;
+        let isOverflow = false;
+        const moreBtnWidth = 90; // 預留給「更多 ▾」按鈕出現時的寬度緩衝
+
+        for (let i = 0; i < allLinks.length; i++) {
+            const item = allLinks[i];
+
+            // 如果前面已經爆滿了，後面的項目直接丟進「更多」收納盒
+            if (isOverflow) {
+                overflowLinks.appendChild(item);
+                continue;
+            }
+
+            // 累加當前項目的寬度（包含外距）
+            const itemStyle = window.getComputedStyle(item);
+            const marginLeft = parseFloat(itemStyle.marginLeft) || 0;
+            const marginRight = parseFloat(itemStyle.marginRight) || 0;
+            totalWidth += item.offsetWidth + marginLeft + marginRight;
+
+            // 💡 關鍵判斷：如果目前的總寬度加上「更多」按鈕寬度超過了導覽列總寬
+            if (totalWidth + moreBtnWidth > navContainerWidth) {
+                isOverflow = true;
+                moreMenu.style.display = 'inline-block'; // 顯現「更多」
+                overflowLinks.appendChild(item);         // 將當前這個放進收納盒
+            }
+        }
+    }
+
+    // 4. 初始化執行，並綁定視窗縮放事件
+    adjustNavItems();
+    window.removeEventListener('resize', adjustNavItems); // 防重複綁定
+    window.addEventListener('resize', adjustNavItems);
+}
+    </script>
 
     
-</BaseLayout>
+</body>
+</html>

@@ -1,0 +1,26 @@
+---
+// 1. 匯入剛剛寫好的頁首與頁尾元件
+import Header from '../components/Header.astro';
+import Footer from '../components/Foter.astro';
+
+// 2. 接收從各頁面傳進來的網頁標題（Title）
+const { title = "預設標題" } = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{title}</title>
+</head>
+<body>
+    <Header />
+
+    <main>
+        <slot />
+    </main>
+
+    <Footer />
+</body>
+</html>

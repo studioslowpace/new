@@ -1,0 +1,241 @@
+<link rel="icon" sizes="192x192" href="/images/logo-small2.png" type="image/x-icon">
+  <link rel="shortcut icon" href="/images/logo-small2.png" type="image/x-icon">
+  <link rel="apple-touch-icon" href="/images/logo-small2.png" type="image/x-icon">
+
+<style>
+    /* ==========================================================================
+       頁首基本設定
+       ========================================================================== */
+    .header-navbar {
+        width: 100%;
+        background-color: #ffffff;
+        border-bottom: 1px solid #EAEAEA;
+        position: relative; /* 確保下拉選單能定位在此 */
+        z-index: 9000;      /* 確保 Header 在最上層 */
+    }
+
+    .header-navbar-container {
+        max-width: 1600px;
+        margin: 0 auto;     /* 置中 */
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0px 50px;
+    }
+
+    .header-logo-area {
+        display: flex;
+        align-items: center;
+        gap: 15px; /* 稍微縮小間距，讓登入圖示緊鄰 */
+        padding: 10px 0px 10px 0px;
+    }
+
+    .header-logo-icon img {
+        max-height: 50px;
+        width: auto;
+    }
+
+    .header-logo-link:hover {
+        cursor: pointer;
+        opacity: 0.8; 
+        transition: opacity 0.2s;
+    }
+
+    /* 🛠️ 新增：管理員登入圖示按鈕樣式 */
+    .admin-icon-btn {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        padding: 5px;
+        color: #333333;
+        transition: color 0.2s, transform 0.1s;
+        display: flex;
+        align-items: center;
+    }
+    .admin-icon-btn:hover {
+        color: #1465A3;
+        transform: scale(1.05);
+    }
+    .admin-icon-btn.logged-in {
+        color: #2c3e2f; /* 登入後變換深綠色或特定顏色 */
+    }
+
+    /* 🛠️ 新增：全域搜索圖示樣式 */
+    .search-icon-btn {
+        background: none;
+        border: none;
+        font-size: 1.35rem;
+        cursor: pointer;
+        padding: 5px;
+        color: #333333;
+        transition: color 0.2s;
+        display: flex;
+        align-items: center;
+    }
+    .search-icon-btn:hover {
+        color: #1465A3;
+    }
+
+    .header-nav-links {
+        display: flex;
+        align-items: center; /* 確保搜尋圖示與文字置中對齊 */
+        gap: 35px;
+    }
+
+    .header-nav-links a {
+        text-decoration: none;
+        color: #333333;
+        font-size: 1rem;
+        font-weight: 500;
+        transition: color 0.2s;
+    }
+
+    .header-nav-links a:hover { color: #1465A3; }
+
+    .menu-toggle { display: none; background: none; border: none; font-size: 2rem; padding: 5px 10px;}
+
+    .more-dropdown {
+        position: relative;
+        display: inline-block;
+    }
+
+    .more-toggle {
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    /* 漂浮的小盒子 */
+    .more-dropdown-content {
+        display: none;
+        position: absolute;
+        right: 0;
+        top: 100%;
+        background-color: #ffffff;
+        min-width: 150px;
+        box-shadow: 0px 8px 16px rgba(0,0,0,0.15);
+        border-radius: 6px;
+        z-index: 9999;
+        padding: 5px 0;
+    }
+
+    /* 當滑鼠移到「更多」上面時，展現盒子 */
+    .more-dropdown:hover .more-dropdown-content {
+        display: block;
+    }
+
+    /* 盒子裡面的連結樣式 */
+    .more-dropdown-content a {
+        color: #333333 !important;
+        padding: 12px 16px !important;
+        text-decoration: none !important;
+        display: block !important;
+        text-align: left !important;
+    }
+
+    .more-dropdown-content a:hover {
+        background-color: #f5f5f5 !important;
+        color: #1465A3 !important;
+    }
+
+    /* 預設訪客狀態：圖片半透明 */
+  #auth-btn #auth-btn-img {
+      width: 40px;
+      height: auto;
+
+  }
+  /* 當按鈕加上 .logged-in 類別時（管理員登入），自動變亮並發光 */
+  #auth-btn.logged-in #auth-btn-img {
+      opacity: 1;
+      filter: drop-shadow(0 0 6px rgba(20, 101, 163, 0.6));
+  }
+
+    /* 手機版斷點 */
+    @media (max-width: 768px) {
+        .header-navbar-container { padding: 10px 10px; }
+        .header-logo-area {
+            width: 100%;
+            display: flex;
+            justify-content: flex-start; /* 讓 Logo 和 鎖頭 在左邊靠齊 */
+            align-items: center;
+        }
+        
+        /* 手機版時，把漢堡選單按鈕推到最右邊 */
+        .menu-toggle { 
+            display: block !important;
+            font-size: 2rem !important;
+            color: #333333 !important;
+            background: #ffffff !important; 
+            padding: 5px 10px !important;
+            border-radius: 6px !important;
+            border: none !important;
+            cursor: pointer !important;
+            margin-left: auto; /* 自動推至最右側 */
+        }
+
+        .header-nav-links {
+            display: none; /* 預設隱藏 */
+            flex-direction: column;
+            position: absolute;
+            top: 100%; /* 緊貼 navbar 下緣 */
+            left: 0;
+            width: 100%;
+            background: #fff;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            text-align: center;
+            z-index: 9999;
+            gap: 20px;
+        }
+
+        .menu-toggle:hover {
+            color: #1465A3; 
+            cursor: pointer; 
+        }
+        .header-nav-links.active {
+            display: flex; /* 按下後顯示 */
+        }
+        
+        /* 手機版時搜尋按鈕與其他連結垂直排列 */
+        .search-icon-btn {
+            justify-content: center;
+            width: 100%;
+            font-size: 1.5rem;
+            padding: 10px 0;
+        }
+    }
+</style>
+
+<header class="header-navbar">
+    <div class="header-navbar-container">
+        <div class="header-logo-area">
+            <a href="/" class="header-logo-link" aria-label="回到首頁">
+                <div class="header-logo-icon">
+                    <img src="/images/logo-word.png" alt="空間客舍 Logo" oncontextmenu="return false;" ondragstart="return false;">
+                </div>
+            </a>
+            
+<button id="auth-btn" class="admin-icon-btn" onclick="handleHeaderAuthAction()" title="管理員登入">
+    <img id="auth-btn-img" src="/images/logo-small2.png" alt="管理員模式">
+</button>
+            
+            <button class="menu-toggle" aria-label="打開選單">☰</button>
+        </div>
+        
+        <nav class="header-nav-links">
+            <a href="/passionprojects">自主企劃</a>
+            <a href="https://linktr.ee/Slowpace_studio" target="_blank" rel="noopener noreferrer">活動報名</a>
+            <a href="/timetable/slowpacestudio/">客舍時間表</a>
+            <a href="/gaming">悠閒小遊戲</a>
+            <a href="/newsletter.html">客舍電子報</a>
+            <a href="/skillsupermarket.html">客舍萬事屋</a>
+            
+            <div class="more-dropdown" id="more-menu" style="display: none;">
+                <a href="#" class="more-toggle">更多 ▾</a>
+                <div class="more-dropdown-content" id="overflow-links"></div>
+            </div>
+
+            <button class="search-icon-btn" onclick="triggerGlobalSearch()" title="全域搜尋">🔍</button>
+        </nav>
+    </div>
+</header>

@@ -1,0 +1,218 @@
+<style>
+    /* 頁尾最外層 */
+    #global-footer.custom-footer {
+        all: unset !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        width: 100% !important;
+        background-color: #F7EAE3 !important; /* 粉米色背景 */
+        padding: 20px 0 20px 0 !important;    /* 增加上方內邊距，讓整體更舒展 */
+        box-sizing: border-box !important;
+        font-family: inherit !important;      
+        border: none !important; 
+        border-top: 4px solid rgba(20, 101, 163, 0.6) !important; 
+    }
+
+    .custom-footer p {
+        margin: 0;
+        padding: 0;
+    }
+    .custom-footer a {
+        text-decoration: none;
+    }
+
+    /* 頁尾主內容包覆層 */
+    .footer-content {
+        width: 100%;
+        max-width: 1200px; 
+        padding: 0 40px;
+        display: flex;
+        justify-content: center;
+        align-items: center; /* 讓左右兩邊垂直居中對齊 */
+        gap: 60px;           /* 🟢 稍微拉開左邊 Logo 與右邊文字的間距 */
+        box-sizing: border-box;
+    }
+
+    /* 左側 Logo 區塊 */
+    .footer-logo-side {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        flex-shrink: 0;
+    }
+    .footer-logo-img {
+        width: 220px; 
+        height: auto;
+    }
+
+    /* 右側文字資訊區塊 */
+    .footer-info-side {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;         /* 🟢 控制右側所有行與行之間的「基礎間距」，讓結構緊湊 */
+        color: #1465A3;    
+    }
+    .footer-title-row {
+        display: flex;
+        align-items: baseline;
+        gap: 15px;
+        margin-bottom: 5px; /* 🟢 讓大標題跟標籤之間不要空太大 */
+    }
+    .footer-title-row h3 {
+        margin: 0;
+        font-size: 2rem;    /* 稍微放大，更有主標題感 */
+        font-weight: 600;
+        letter-spacing: 3px;
+    }
+    .footer-title-row span {
+        font-size: 1.4rem;
+        font-weight: 400;
+        letter-spacing: 1px;
+    }
+    .footer-tags {
+        font-size: 0.95rem;
+        font-weight: 500;
+        letter-spacing: 1px;
+        color: #1465A3;
+        margin-bottom: 10px; /* 🟢 讓標籤與下方的營業時間拉開多一點距離，形成區塊感 */
+    }
+    .footer-details {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;            /* 🟢 讓營業時間、地址、IG 連結之間有舒服的 8px 固定間隔 */
+        font-size: 0.9rem;   /* 稍微放大一點點提高清晰度 */
+        line-height: 1.5;
+        font-weight: 400;
+    }
+
+    /* IG 連結 */
+    .footer-ig-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        color: #1465A3;
+        font-size: 0.95rem;
+        font-weight: 500;
+        margin-top: 5px;     /* 🟢 讓 IG 稍微獨立出來一點點 */
+    }
+    
+    /* Pure CSS IG Icon 保持不變 */
+    .ig-icon-placeholder {
+        width: 24px;
+        height: 24px;
+        border: 2.5px solid #1465A3;
+        border-radius: 6px;
+        position: relative;
+        display: inline-block;
+        box-sizing: border-box;
+    }
+    .ig-icon-placeholder::before {
+        content: '';
+        position: absolute;
+        width: 6px;
+        height: 6px;
+        border: 2.5px solid #1465A3;
+        border-radius: 50%;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+    .ig-icon-placeholder::after {
+        content: '';
+        position: absolute;
+        width: 2.5px;
+        height: 2.5px;
+        background-color: #1465A3;
+        border-radius: 50%;
+        top: 3px;
+        right: 3px;
+    }
+
+    /* 版權宣告區塊 */
+    .footer-copyright {
+        width: 100%;
+        text-align: center;
+        margin-top: 15px;    /* 🟢 增加與上方大區塊的距離，不與網格線擠在一起 */
+        font-size: 1.1rem;
+        color: #1465A3;
+        font-weight: 400;
+        letter-spacing: 0.5px;
+    }
+    .copyright-line {
+        border-top: 1.5px solid rgba(20, 101, 163, 0.4); /* 橫線稍微細一點，更精緻 */
+        padding-top: 10px;   /* 🟢 增加橫線與下面文字 Copyright 的距離 */
+        display: inline-block; 
+        width: 85%;          /* 讓橫線在大螢幕上延伸得更優雅，貼近你的截圖視覺 */
+        max-width: 1120px;   /* 限制橫線最大寬度不超過內容物 */
+    }
+
+    /* 📱 RWD 手機板優化 */
+    @media (max-width: 1024px) {
+        .footer-content { gap: 30px; padding: 0 20px; }
+    }
+    @media (max-width: 768px) {
+        #global-footer.custom-footer {
+            padding: 15px 0 15px 0 !important;
+        }
+        .footer-content { 
+            flex-direction: column; 
+            gap: 5px; 
+            text-align: center; 
+            padding: 0 5px; 
+        }
+        .footer-logo-img {
+            display: none; 
+        }
+        .footer-info-side {
+            gap: 15px;
+        }
+        .footer-title-row { 
+            justify-content: center; 
+            flex-direction: column; 
+            align-items: center; 
+            gap: 5px; 
+            margin-bottom: 0;
+        }
+        .footer-title-row h3 { font-size: 22px; }
+        .footer-title-row span { font-size: 16px; }
+        .footer-tags { font-size: 12px; margin-bottom: 0; }
+        .footer-details { font-size: 11px; gap: 10px; align-items: center; }
+        .footer-ig-link { font-size: 13px; justify-content: center; margin-top: 0; }
+        .footer-copyright { font-size: 13px; margin-top: 25px; }
+        .copyright-line { width: 90%; padding-top: 15px; }
+    }
+</style>
+
+<footer class="custom-footer">
+<div class="footer-content">
+    <div class="footer-logo-side">
+        <a href="/" aria-label="回到首頁">
+        <img src="/images/logo-square.png" class="footer-logo-img" alt="空間客舍 Logo" oncontextmenu="return false;" ondragstart="return false;">
+        </a>
+    </div>
+    <div class="footer-info-side">
+        <div class="footer-title-row">
+            <h3>空間客舍</h3>
+            <span>Slow Pace Studio</span>
+        </div>
+        <div class="footer-tags">
+            #文創空間 &nbsp;#作品展示 &nbsp;#作品寄賣 &nbsp;#工作坊 &nbsp;#讀書會
+        </div>
+        <div class="footer-details">
+            <p>營業時間：逢星期一至三 19:00 - 21:00（其他開店時間請留意IG之公佈）</p>
+            <p>地址：長沙灣青山道463-471號聯邦廣場1樓143號舖</p>
+            <a href="https://www.instagram.com/slowpace_studio" target="_blank" class="footer-ig-link">
+                <span class="ig-icon-placeholder"></span>
+                <span>IG@slowpace_studio</span>
+            </a>
+        </div>
+    </div>
+</div>
+<div class="footer-copyright">
+    <span class="copyright-line">
+        &copy; <span id="current-year"></span> by Slow Pace Studio
+    </span>
+</div>
+</footer>
